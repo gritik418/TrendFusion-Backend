@@ -89,10 +89,7 @@ const OrderSchema = new Schema<Order>(
       ref: "User",
       required: true,
     },
-    items: {
-      type: [ProductItemSchema],
-      required: true,
-    },
+    items: [ProductItemSchema],
     totalPrice: {
       type: Number,
       required: true,

@@ -32,7 +32,7 @@ interface Product extends Document {
   offers?: Offers;
 }
 
-interface Order {
+interface Order extends Document {
   orderId: string;
   userId: Types.ObjectId;
   orderDate: Date;
@@ -53,7 +53,7 @@ interface Order {
 }
 
 interface Cart {
-  userId: string;
+  userId: Types.ObjectId;
   items: string[] | CartItem[];
   totalPrice: number;
   discount?: Discount;
@@ -74,7 +74,7 @@ interface OrderProductInfo {
 }
 
 interface CartItem {
-  productId: string;
+  productId: Types.ObjectId;
   title: string;
   brand: string;
   thumbnail: string;
