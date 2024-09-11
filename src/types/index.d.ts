@@ -34,11 +34,11 @@ interface Product extends Document {
 
 interface Order {
   orderId: string;
-  userId: string;
+  userId: Types.ObjectId;
   orderDate: Date;
   deliveryDate?: Date;
   status: "Pending" | "Shipped" | "Delivered" | "Cancelled";
-  items: string[] | OrderProductInfo[];
+  items: OrderProductInfo[] | undefined;
   totalQuantity: number;
   totalPrice: number;
   discount?: Discount;
@@ -62,7 +62,7 @@ interface Cart {
 }
 
 interface OrderProductInfo {
-  productId: string;
+  productId: Types.ObjectId;
   title: string;
   brand: string;
   thumbnail: string;
@@ -115,7 +115,7 @@ interface DeliveryAddress {
   postalCode: string;
   landmark?: string;
   appartment?: string;
-  phoneNumber: number[];
+  phoneNumber: string[];
 }
 
 interface Discount {
