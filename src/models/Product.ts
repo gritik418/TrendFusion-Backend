@@ -1,5 +1,17 @@
 import mongoose, { model, Model, Schema } from "mongoose";
 
+export const DiscountSchema = new Schema<Discount>({
+  description: { type: String },
+  discountType: {
+    type: String,
+    enum: ["Percentage", "Fixed"],
+  },
+  value: {
+    type: Number,
+    min: 0,
+  },
+});
+
 const ProductSchema = new Schema<Product>(
   {
     productId: {
@@ -28,10 +40,8 @@ const ProductSchema = new Schema<Product>(
       required: true,
       min: 1,
     },
-    discountPercentage: {
-      type: Number,
-      min: 0,
-      max: 99,
+    discount: {
+      type: DiscountSchema,
     },
     rating: {
       type: Number,
@@ -71,6 +81,10 @@ const ProductSchema = new Schema<Product>(
     },
     specifications: {
       type: Schema.Types.Mixed,
+    },
+    isAvailable: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }

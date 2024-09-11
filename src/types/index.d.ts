@@ -8,6 +8,7 @@ interface User extends Document {
   password?: string;
   verificationCode?: string;
   verificationCodeExpiry?: Date;
+  phoneNumber: number;
 }
 
 interface Product extends Document {
@@ -16,11 +17,12 @@ interface Product extends Document {
   brand?: string;
   description: string;
   thumbnail: string;
+  isAvailable: boolean;
   images?: string[];
   category?: string;
   price: number;
   warranty?: string;
-  discountPercentage?: number;
+  discount?: Discount;
   rating?: number;
   stock: number;
   color?: string;
@@ -28,6 +30,60 @@ interface Product extends Document {
   highlights: string[];
   specifications?: Specifications;
   offers?: Offers;
+}
+
+interface Order {
+  orderId: string;
+  userId: string;
+  orderDate: Date;
+  deliveryDate?: Date;
+  status: "Pending" | "Shipped" | "Delivered" | "Cancelled";
+  items: string[] | OrderProductInfo[];
+  totalQuantity: number;
+  totalPrice: number;
+  discount?: Discount;
+  finalPrice: number;
+  paymentMethod:
+    | "Credit Card"
+    | "PayPal"
+    | "Bank Transfer"
+    | "Cash on Delivery";
+  deliveryAddress: DeliveryAddress;
+  trackingId?: string;
+}
+
+interface Cart {
+  userId: string;
+  items: string[] | CartItem[];
+  totalPrice: number;
+  discount?: Discount;
+  finalPrice: number;
+  totalQuantity: number;
+}
+
+interface OrderProductInfo {
+  productId: string;
+  title: string;
+  brand: string;
+  thumbnail: string;
+  quantity: number;
+  unitPrice: number;
+  unitDiscount?: Discount;
+  color?: string;
+  size?: string;
+}
+
+interface CartItem {
+  productId: string;
+  title: string;
+  brand: string;
+  thumbnail: string;
+  quantity: number;
+  stock: number;
+  unitPrice: number;
+  unitDiscount?: Discount;
+  color?: string;
+  size?: string;
 }
 
 interface Specifications {
@@ -47,4 +103,23 @@ interface Reviews {
   title?: string;
   description?: string;
   images?: string[];
+}
+
+interface DeliveryAddress {
+  firstName: string;
+  lastName?: string;
+  city: string;
+  state: string;
+  street: string;
+  country: string;
+  postalCode: string;
+  landmark?: string;
+  appartment?: string;
+  phoneNumber: number[];
+}
+
+interface Discount {
+  discountType: "Percentage" | "Fixed";
+  value: number;
+  description?: string;
 }
