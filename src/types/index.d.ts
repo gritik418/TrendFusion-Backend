@@ -52,7 +52,7 @@ interface Order extends Document {
   trackingId?: string;
 }
 
-interface Cart {
+interface Cart extends Document {
   userId: Types.ObjectId;
   items: string[] | CartItem[];
   totalPrice: number;
@@ -97,8 +97,8 @@ interface Offers {
 }
 
 interface Reviews {
-  userId: string;
-  productId: string;
+  userId: Types.ObjectId;
+  productId: Types.ObjectId;
   rating: number;
   title?: string;
   description?: string;
