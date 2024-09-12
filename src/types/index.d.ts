@@ -61,6 +61,15 @@ interface Cart extends Document {
   totalQuantity: number;
 }
 
+interface Reviews extends Document {
+  userId: Types.ObjectId;
+  productId: Types.ObjectId;
+  rating: number;
+  title?: string;
+  description?: string;
+  images?: string[];
+}
+
 interface OrderProductInfo {
   productId: Types.ObjectId;
   title: string;
@@ -94,15 +103,6 @@ interface Specifications {
 
 interface Offers {
   [offerType: string]: string;
-}
-
-interface Reviews {
-  userId: Types.ObjectId;
-  productId: Types.ObjectId;
-  rating: number;
-  title?: string;
-  description?: string;
-  images?: string[];
 }
 
 interface DeliveryAddress {
