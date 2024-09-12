@@ -1,23 +1,9 @@
 import { ApolloServer } from "@apollo/server";
-import { Query } from "mongoose";
+import product from "./product";
 
 const gqlServer = new ApolloServer({
-  typeDefs: `
-        type User{
-            firstName: String
-        }
-
-        type Query {
-            user: User
-        }
-    `,
-  resolvers: {
-    Query: {
-      user: () => {
-        return { firstName: "Hellp" };
-      },
-    },
-  },
+  typeDefs: product.typeDefs,
+  resolvers: product.resolvers,
 });
 
 export default gqlServer;
