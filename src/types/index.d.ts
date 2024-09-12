@@ -123,3 +123,8 @@ interface Discount {
   value: number;
   description?: string;
 }
+
+type JWTPayload = {
+  id: string;
+  email: string;
+};
