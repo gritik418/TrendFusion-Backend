@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userSignup = exports.userLogin = void 0;
+exports.veriyEmail = exports.userSignup = exports.userLogin = void 0;
 const loginSchema_1 = __importDefault(require("../validators/loginSchema"));
 const User_1 = __importDefault(require("../models/User"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -14,6 +14,7 @@ const signupSchema_1 = __importDefault(require("../validators/signupSchema"));
 const generateOTP_1 = __importDefault(require("../helpers/generateOTP"));
 const sendEmail_1 = __importDefault(require("../helpers/sendEmail"));
 const verificationTemplate_1 = __importDefault(require("../utils/verificationTemplate"));
+const verifyEmailSchema_1 = __importDefault(require("../validators/verifyEmailSchema"));
 const userLogin = async (req, res) => {
     try {
         const { identifier, password } = req.body;
@@ -124,7 +125,8 @@ const userSignup = async (req, res) => {
         }
         const salt = await bcryptjs_1.default.genSalt(10);
         const hashedPassword = await bcryptjs_1.default.hash(result.data.password, salt);
-        const verificationCode = (0, generateOTP_1.default)().toString();
+        const verificationCodeSalt = await bcryptjs_1.default.genSalt(8);
+        const verificationCode = await bcryptjs_1.default.hash((0, generateOTP_1.default)().toString(), verificationCodeSalt);
         const user = new User_1.default({
             firstName: result.data.firstName,
             lastName: result.data.lastName || "",
@@ -155,3 +157,65 @@ const userSignup = async (req, res) => {
     }
 };
 exports.userSignup = userSignup;
+const veriyEmail = async (req, res) => {
+    try {
+        const { email, verificationCode } = req.body;
+        const result = verifyEmailSchema_1.default.safeParse({
+            email,
+            verificationCode,
+        });
+        if (!result.success) {
+            if (result.error) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Validation Error.",
+                    errors: result.error.errors,
+                });
+            }
+            return res.status(400).json({
+                success: false,
+                message: "Something went wrong.",
+            });
+        }
+        const user = await User_1.default.findOne({
+            email: result.data.email,
+        });
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
+        const isOTPValid = new Date(user.verificationCodeExpiry).getTime() > new Date().getTime();
+        if (!isOTPValid) {
+            await User_1.default.findByIdAndDelete(user._id);
+            return res.status(401).json({
+                success: false,
+                message: "OTP Expired.",
+            });
+        }
+        await User_1.default.findByIdAndUpdate(user._id, {
+            $set: {
+                isVerified: true,
+                verificationCode: null,
+                verificationCodeExpiry: null,
+            },
+        });
+        const payload = {
+            id: user._id.toString(),
+            email: user.email,
+        };
+        const token = jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET);
+        return res.status(200).cookie(variables_1.TF_TOKEN, token, options_1.cookieOptions).json({
+            success: true,
+            message: "Account verified successfully.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Server Error.",
+        });
+    }
+};
+exports.veriyEmail = veriyEmail;

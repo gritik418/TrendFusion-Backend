@@ -9,6 +9,9 @@ import signupSchema, { SignupDataType } from "../validators/signupSchema";
 import generateOTP from "../helpers/generateOTP";
 import sendEmail from "../helpers/sendEmail";
 import verificationTemplate from "../utils/verificationTemplate";
+import verifyEmailSchema, {
+  VerifyEmailDataType,
+} from "../validators/verifyEmailSchema";
 
 export const userLogin = async (req: Request, res: Response) => {
   try {
@@ -138,7 +141,11 @@ export const userSignup = async (req: Request, res: Response) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(result.data.password, salt);
-    const verificationCode: string = generateOTP().toString();
+    const verificationCodeSalt = await bcrypt.genSalt(8);
+    const verificationCode: string = await bcrypt.hash(
+      generateOTP().toString(),
+      verificationCodeSalt
+    );
 
     const user = new User({
       firstName: result.data.firstName,
@@ -162,6 +169,75 @@ export const userSignup = async (req: Request, res: Response) => {
     return res.status(201).json({
       success: true,
       message: "Account created, Please verify your email address.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error.",
+    });
+  }
+};
+
+export const veriyEmail = async (req: Request, res: Response) => {
+  try {
+    const { email, verificationCode }: VerifyEmailDataType = req.body;
+
+    const result = verifyEmailSchema.safeParse({
+      email,
+      verificationCode,
+    });
+
+    if (!result.success) {
+      if (result.error) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation Error.",
+          errors: result.error.errors,
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: "Something went wrong.",
+      });
+    }
+
+    const user = await User.findOne({
+      email: result.data.email,
+    });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const isOTPValid: boolean =
+      new Date(user.verificationCodeExpiry!).getTime() > new Date().getTime();
+    if (!isOTPValid) {
+      await User.findByIdAndDelete(user._id);
+      return res.status(401).json({
+        success: false,
+        message: "OTP Expired.",
+      });
+    }
+
+    await User.findByIdAndUpdate(user._id, {
+      $set: {
+        isVerified: true,
+        verificationCode: null,
+        verificationCodeExpiry: null,
+      },
+    });
+
+    const payload: JWTPayload = {
+      id: user._id.toString(),
+      email: user.email,
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET!);
+
+    return res.status(200).cookie(TF_TOKEN, token, cookieOptions).json({
+      success: true,
+      message: "Account verified successfully.",
     });
   } catch (error) {
     return res.status(500).json({
