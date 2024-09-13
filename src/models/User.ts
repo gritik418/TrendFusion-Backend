@@ -27,6 +27,7 @@ const UserSchema = new Schema<User>(
     provider: {
       type: String,
       enum: ["credentials", "google"],
+      default: "credentials",
     },
     password: {
       type: String,

@@ -50,6 +50,7 @@ const UserSchema = new mongoose_1.Schema({
     provider: {
         type: String,
         enum: ["credentials", "google"],
+        default: "credentials",
     },
     password: {
         type: String,
