@@ -15,12 +15,16 @@ const adminAuth = (req: Request, res: Response, next: NextFunction) => {
 
     const verify = jwt.verify(
       token,
-      process.env.JWT_SECRET!
+      process.env.ADMIN_JWT_SECRET!
     ) as AdminJWTPayload;
+
     if (!verify) throw new Error("Please Login.");
 
-    console.log(verify.id, verify.email);
     if (verify.role !== "admin") throw new Error("Only admins are allowed.");
+
+    req.params.adminId = verify.id;
+    req.params.adminEmail = verify.email;
+    req.params.role = verify.role;
     next();
   } catch (error) {
     return res.status(401).json({

@@ -39,7 +39,7 @@ const adminLogin = async (req, res) => {
             email: result.data.email,
             isVerified: true,
             userRole: "admin",
-        }).select({ password: 1 });
+        }).select({ password: 1, email: 1, userRole: 1 });
         if (!admin)
             return res.status(401).json({
                 success: false,

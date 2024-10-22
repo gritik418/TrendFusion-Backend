@@ -10,12 +10,14 @@ const adminAuth = (req, res, next) => {
         const token = req.cookies[variables_1.ADMIN_TF_TOKEN];
         if (!token)
             throw new Error("Please Login.");
-        const verify = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        const verify = jsonwebtoken_1.default.verify(token, process.env.ADMIN_JWT_SECRET);
         if (!verify)
             throw new Error("Please Login.");
-        console.log(verify.id, verify.email);
         if (verify.role !== "admin")
             throw new Error("Only admins are allowed.");
+        req.params.adminId = verify.id;
+        req.params.adminEmail = verify.email;
+        req.params.role = verify.role;
         next();
     }
     catch (error) {
