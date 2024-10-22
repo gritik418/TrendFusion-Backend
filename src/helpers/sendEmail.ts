@@ -23,10 +23,8 @@ const sendEmail = async (mailOptions: MailOptionsType) => {
     await new Promise((resolve, reject) => {
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-          console.log(error);
           reject(error);
         } else {
-          console.log(info);
           resolve(info);
         }
       });

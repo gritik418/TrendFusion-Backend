@@ -79,10 +79,6 @@ const DeliveryAddressSchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
-    country: {
-        type: String,
-        default: "India",
-    },
     street: {
         type: String,
         trim: true,
@@ -141,8 +137,15 @@ const OrderSchema = new mongoose_1.Schema({
         required: true,
         default: Date.now,
     },
-    deliveryDate: {
+    expectedDeliveryDate: {
         type: Date,
+    },
+    deliveredOn: {
+        type: Date,
+    },
+    itemCount: {
+        type: Number,
+        required: true,
     },
     deliveryAddress: DeliveryAddressSchema,
     trackingId: {

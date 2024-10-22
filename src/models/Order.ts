@@ -56,10 +56,6 @@ const DeliveryAddressSchema = new Schema<DeliveryAddress>({
     type: String,
     required: true,
   },
-  country: {
-    type: String,
-    default: "India",
-  },
   street: {
     type: String,
     trim: true,
@@ -120,8 +116,15 @@ const OrderSchema = new Schema<Order>(
       required: true,
       default: Date.now,
     },
-    deliveryDate: {
+    expectedDeliveryDate: {
       type: Date,
+    },
+    deliveredOn: {
+      type: Date,
+    },
+    itemCount: {
+      type: Number,
+      required: true,
     },
     deliveryAddress: DeliveryAddressSchema,
     trackingId: {

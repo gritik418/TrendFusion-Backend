@@ -1,44 +1,67 @@
-interface User extends Document {
+interface User {
   firstName: string;
   lastName?: string;
   email: string;
   username: string;
+  avatar?: string;
+  gender?: "male" | "female";
   isVerified: boolean;
   provider: "credentials" | "google";
   password?: string;
   verificationCode?: string;
   verificationCodeExpiry?: Date;
-  phoneNumber: number;
+  phoneNumber: string;
+  addresses: DeliveryAddress[];
+  wishlist: Types.ObjectId[];
+  userRole: "customer" | "admin" | "seller";
+  orderHistory: Types.ObjectId[];
 }
 
-interface Product extends Document {
+interface Product {
   productId: string;
   title: string;
   brand?: string;
   description: string;
   thumbnail: string;
   isAvailable: boolean;
-  images?: string[];
+  images: string[];
   category?: string;
   price: number;
   warranty?: string;
   discount?: Discount;
   rating?: number;
   stock: number;
-  color?: string;
+  color?: Color;
   size?: string;
   highlights: string[];
   specifications?: Specifications;
-  offers?: Offers;
+  offers?: Offers[];
 }
 
-interface Order extends Document {
+interface ProductWithVariants extends Product {
+  variants?: Variants[];
+}
+
+type Variants = {
+  colorName: string;
+  colorImage: string;
+  sizes: VariantSize[];
+};
+
+type Color = {
+  colorName: string;
+  colorImage: string;
+};
+
+interface Order {
   orderId: string;
   userId: Types.ObjectId;
   orderDate: Date;
-  deliveryDate?: Date;
+  expectedDeliveryDate?: Date;
+  deliveredOn?: Date;
   status: "Pending" | "Shipped" | "Delivered" | "Cancelled";
-  items: OrderProductInfo[] | undefined;
+  items: OrderProductInfo[];
+  itemCount: number;
   totalQuantity: number;
   totalPrice: number;
   discount?: Discount;
@@ -52,7 +75,7 @@ interface Order extends Document {
   trackingId?: string;
 }
 
-interface Cart extends Document {
+interface Cart {
   userId: Types.ObjectId;
   items: string[] | CartItem[];
   totalPrice: number;
@@ -61,13 +84,25 @@ interface Cart extends Document {
   totalQuantity: number;
 }
 
-interface Reviews extends Document {
+interface Reviews {
   userId: Types.ObjectId;
   productId: Types.ObjectId;
   rating: number;
   title?: string;
   description?: string;
   images?: string[];
+}
+
+interface WishlistItem {
+  productId: string;
+  title: string;
+  brand?: string;
+  thumbnail: string;
+  isAvailable: boolean;
+  price: number;
+  discount?: Discount;
+  rating?: number;
+  stock: number;
 }
 
 interface OrderProductInfo {
@@ -102,8 +137,14 @@ interface Specifications {
 }
 
 interface Offers {
-  [offerType: string]: string;
+  offerType: string;
+  offer: string;
 }
+
+type Color = {
+  colorName: string;
+  colorImage: string;
+};
 
 interface DeliveryAddress {
   firstName: string;
@@ -111,11 +152,13 @@ interface DeliveryAddress {
   city: string;
   state: string;
   street: string;
-  country: string;
   postalCode: string;
   landmark?: string;
   appartment?: string;
-  phoneNumber: string[];
+  phoneNumber: string;
+  alternatePhoneNumber?: string;
+  isDefault: boolean;
+  addressType: "home" | "work";
 }
 
 interface Discount {
@@ -124,7 +167,8 @@ interface Discount {
   description?: string;
 }
 
-type JWTPayload = {
+interface JWTPayload extends JwtPayload {
   id: string;
   email: string;
-};
+  role: "customer" | "admin" | "seller";
+}

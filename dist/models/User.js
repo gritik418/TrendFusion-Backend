@@ -24,6 +24,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
+const AddressSchema = new mongoose_1.Schema({
+    firstName: { type: String, required: true },
+    lastName: { type: String },
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    postalCode: { type: String, required: true },
+    isDefault: { type: Boolean, default: false },
+    appartment: { type: String },
+    landmark: { type: String },
+    phoneNumber: [{ type: String }],
+});
 const UserSchema = new mongoose_1.Schema({
     firstName: {
         type: String,
@@ -42,6 +54,10 @@ const UserSchema = new mongoose_1.Schema({
         type: String,
         required: true,
         unique: true,
+    },
+    gender: {
+        type: String,
+        enum: ["male", "female"],
     },
     isVerified: {
         type: Boolean,
@@ -62,6 +78,29 @@ const UserSchema = new mongoose_1.Schema({
     verificationCodeExpiry: {
         type: Date,
     },
+    addresses: [AddressSchema],
+    avatar: {
+        type: String,
+        default: `${process.env.CLIENT_DOMAIN}/images/avatar.jpeg`,
+    },
+    orderHistory: [
+        {
+            type: mongoose_1.Types.ObjectId,
+            ref: "Product",
+        },
+    ],
+    phoneNumber: { type: String },
+    userRole: {
+        type: String,
+        default: "customer",
+        enum: ["customer", "seller", "admin"],
+    },
+    wishlist: [
+        {
+            type: mongoose_1.Types.ObjectId,
+            ref: "Product",
+        },
+    ],
 }, { timestamps: true });
 const User = mongoose_1.default.models.User || (0, mongoose_1.model)("User", UserSchema);
 exports.default = User;

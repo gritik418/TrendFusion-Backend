@@ -36,6 +36,18 @@ exports.DiscountSchema = new mongoose_1.Schema({
         min: 0,
     },
 });
+const OfferSchema = new mongoose_1.Schema({
+    offerType: { type: String },
+    offer: {
+        type: String,
+    },
+});
+const ColorSchema = new mongoose_1.Schema({
+    colorName: { type: String },
+    colorImage: {
+        type: String,
+    },
+});
 const ProductSchema = new mongoose_1.Schema({
     productId: {
         type: String,
@@ -71,9 +83,7 @@ const ProductSchema = new mongoose_1.Schema({
         min: 0,
         max: 5,
     },
-    color: {
-        type: String,
-    },
+    color: ColorSchema,
     size: {
         type: String,
     },
@@ -99,9 +109,7 @@ const ProductSchema = new mongoose_1.Schema({
     warranty: {
         type: String,
     },
-    offers: {
-        type: mongoose_1.Schema.Types.Mixed,
-    },
+    offers: [OfferSchema],
     specifications: {
         type: mongoose_1.Schema.Types.Mixed,
     },

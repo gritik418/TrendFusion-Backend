@@ -21,10 +21,14 @@ const userLogin = async (req, res) => {
         const result = loginSchema_1.default.safeParse({ identifier, password });
         if (!result.success) {
             if (result.error) {
+                const errors = {};
+                result.error.errors.forEach((error) => {
+                    errors[error.path[0]] = error.message;
+                });
                 return res.status(400).json({
                     success: false,
                     message: "Validation Error.",
-                    errors: result.error.errors,
+                    errors,
                 });
             }
             return res.status(400).json({
@@ -41,7 +45,7 @@ const userLogin = async (req, res) => {
             ],
             isVerified: true,
             provider: "credentials",
-        }).select({ password: 1, _id: 1, email: 1 });
+        }).select({ password: 1, _id: 1, email: 1, userRole: 1 });
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -58,7 +62,9 @@ const userLogin = async (req, res) => {
         const payload = {
             id: user._id.toString(),
             email: user.email,
+            role: user.userRole,
         };
+        console.log(payload);
         const token = jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET);
         return res.status(200).cookie(variables_1.TF_TOKEN, token, options_1.cookieOptions).json({
             success: true,
@@ -86,10 +92,14 @@ const userSignup = async (req, res) => {
         });
         if (!result.success) {
             if (result.error) {
+                const errors = {};
+                result.error.errors.forEach((error) => {
+                    errors[error.path[0]] = error.message;
+                });
                 return res.status(400).json({
                     success: false,
                     message: "Validation Error.",
-                    errors: result.error.errors,
+                    errors,
                 });
             }
             return res.status(400).json({
@@ -126,14 +136,15 @@ const userSignup = async (req, res) => {
         const salt = await bcryptjs_1.default.genSalt(10);
         const hashedPassword = await bcryptjs_1.default.hash(result.data.password, salt);
         const verificationCodeSalt = await bcryptjs_1.default.genSalt(8);
-        const verificationCode = await bcryptjs_1.default.hash((0, generateOTP_1.default)().toString(), verificationCodeSalt);
+        const verificationCode = (0, generateOTP_1.default)().toString();
+        const hashedCode = await bcryptjs_1.default.hash(verificationCode, verificationCodeSalt);
         const user = new User_1.default({
             firstName: result.data.firstName,
             lastName: result.data.lastName || "",
             username: result.data.username,
             email: result.data.email,
             password: hashedPassword,
-            verificationCode: verificationCode,
+            verificationCode: hashedCode,
             verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
         });
         await user.save();
@@ -166,10 +177,14 @@ const veriyEmail = async (req, res) => {
         });
         if (!result.success) {
             if (result.error) {
+                const errors = {};
+                result.error.errors.forEach((error) => {
+                    errors[error.path[0]] = error.message;
+                });
                 return res.status(400).json({
                     success: false,
                     message: "Validation Error.",
-                    errors: result.error.errors,
+                    errors,
                 });
             }
             return res.status(400).json({
@@ -183,7 +198,7 @@ const veriyEmail = async (req, res) => {
         if (!user) {
             return res.status(401).json({
                 success: false,
-                message: "User not found.",
+                message: "Please signup again.",
             });
         }
         const isOTPValid = new Date(user.verificationCodeExpiry).getTime() > new Date().getTime();
@@ -192,6 +207,14 @@ const veriyEmail = async (req, res) => {
             return res.status(401).json({
                 success: false,
                 message: "OTP Expired.",
+            });
+        }
+        const verify = await bcryptjs_1.default.compare(result.data.verificationCode, user.verificationCode);
+        if (!verify) {
+            await User_1.default.findByIdAndDelete(user._id);
+            return res.status(401).json({
+                success: false,
+                message: "Wrong OTP.",
             });
         }
         await User_1.default.findByIdAndUpdate(user._id, {
@@ -204,6 +227,7 @@ const veriyEmail = async (req, res) => {
         const payload = {
             id: user._id.toString(),
             email: user.email,
+            role: user.userRole,
         };
         const token = jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET);
         return res.status(200).cookie(variables_1.TF_TOKEN, token, options_1.cookieOptions).json({

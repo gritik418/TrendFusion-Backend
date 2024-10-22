@@ -12,6 +12,20 @@ export const DiscountSchema = new Schema<Discount>({
   },
 });
 
+const OfferSchema = new Schema<Offers>({
+  offerType: { type: String },
+  offer: {
+    type: String,
+  },
+});
+
+const ColorSchema = new Schema<Color>({
+  colorName: { type: String },
+  colorImage: {
+    type: String,
+  },
+});
+
 const ProductSchema = new Schema<Product>(
   {
     productId: {
@@ -48,9 +62,7 @@ const ProductSchema = new Schema<Product>(
       min: 0,
       max: 5,
     },
-    color: {
-      type: String,
-    },
+    color: ColorSchema,
     size: {
       type: String,
     },
@@ -76,9 +88,7 @@ const ProductSchema = new Schema<Product>(
     warranty: {
       type: String,
     },
-    offers: {
-      type: Schema.Types.Mixed,
-    },
+    offers: [OfferSchema],
     specifications: {
       type: Schema.Types.Mixed,
     },

@@ -21,10 +21,15 @@ export const userLogin = async (req: Request, res: Response) => {
 
     if (!result.success) {
       if (result.error) {
+        const errors: any = {};
+        result.error.errors.forEach((error) => {
+          errors[error.path[0]] = error.message;
+        });
+
         return res.status(400).json({
           success: false,
           message: "Validation Error.",
-          errors: result.error.errors,
+          errors,
         });
       }
       return res.status(400).json({
@@ -42,7 +47,7 @@ export const userLogin = async (req: Request, res: Response) => {
       ],
       isVerified: true,
       provider: "credentials",
-    }).select({ password: 1, _id: 1, email: 1 });
+    }).select({ password: 1, _id: 1, email: 1, userRole: 1 });
 
     if (!user) {
       return res.status(401).json({
@@ -62,7 +67,9 @@ export const userLogin = async (req: Request, res: Response) => {
     const payload: JWTPayload = {
       id: user._id.toString(),
       email: user.email,
+      role: user.userRole,
     };
+    console.log(payload);
     const token = jwt.sign(payload, process.env.JWT_SECRET!);
 
     return res.status(200).cookie(TF_TOKEN, token, cookieOptions).json({
@@ -99,10 +106,15 @@ export const userSignup = async (req: Request, res: Response) => {
 
     if (!result.success) {
       if (result.error) {
+        const errors: any = {};
+        result.error.errors.forEach((error) => {
+          errors[error.path[0]] = error.message;
+        });
+
         return res.status(400).json({
           success: false,
           message: "Validation Error.",
-          errors: result.error.errors,
+          errors,
         });
       }
       return res.status(400).json({
@@ -142,8 +154,9 @@ export const userSignup = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(result.data.password, salt);
     const verificationCodeSalt = await bcrypt.genSalt(8);
-    const verificationCode: string = await bcrypt.hash(
-      generateOTP().toString(),
+    const verificationCode: string = generateOTP().toString();
+    const hashedCode: string = await bcrypt.hash(
+      verificationCode,
       verificationCodeSalt
     );
 
@@ -153,7 +166,7 @@ export const userSignup = async (req: Request, res: Response) => {
       username: result.data.username,
       email: result.data.email,
       password: hashedPassword,
-      verificationCode: verificationCode,
+      verificationCode: hashedCode,
       verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
     });
     await user.save();
@@ -189,10 +202,15 @@ export const veriyEmail = async (req: Request, res: Response) => {
 
     if (!result.success) {
       if (result.error) {
+        const errors: any = {};
+        result.error.errors.forEach((error) => {
+          errors[error.path[0]] = error.message;
+        });
+
         return res.status(400).json({
           success: false,
           message: "Validation Error.",
-          errors: result.error.errors,
+          errors,
         });
       }
       return res.status(400).json({
@@ -207,7 +225,7 @@ export const veriyEmail = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "User not found.",
+        message: "Please signup again.",
       });
     }
 
@@ -218,6 +236,18 @@ export const veriyEmail = async (req: Request, res: Response) => {
       return res.status(401).json({
         success: false,
         message: "OTP Expired.",
+      });
+    }
+
+    const verify = await bcrypt.compare(
+      result.data.verificationCode,
+      user.verificationCode!
+    );
+    if (!verify) {
+      await User.findByIdAndDelete(user._id);
+      return res.status(401).json({
+        success: false,
+        message: "Wrong OTP.",
       });
     }
 
@@ -232,6 +262,7 @@ export const veriyEmail = async (req: Request, res: Response) => {
     const payload: JWTPayload = {
       id: user._id.toString(),
       email: user.email,
+      role: user.userRole,
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET!);
 
