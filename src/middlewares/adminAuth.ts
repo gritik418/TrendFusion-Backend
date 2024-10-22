@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 export type AdminJWTPayload = {
   email: string;
   id: string;
-  role: "custome" | "admin" | "seller";
+  role: "customer" | "admin" | "seller";
 };
 
 const adminAuth = (req: Request, res: Response, next: NextFunction) => {
