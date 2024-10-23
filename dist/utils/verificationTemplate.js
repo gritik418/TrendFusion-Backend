@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const verificationTemplate = (otp) => {
     return `<head>
   <title></title>
@@ -159,4 +157,4 @@ const verificationTemplate = (otp) => {
 
 </body>`;
 };
-exports.default = verificationTemplate;
+export default verificationTemplate;

@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const Queries = {
     product: () => {
         return {
@@ -8,4 +6,4 @@ const Queries = {
         };
     },
 };
-exports.default = Queries;
+export default Queries;

@@ -1,5 +1,5 @@
 import mongoose, { model, Model, Schema } from "mongoose";
-import { DiscountSchema } from "./Product";
+import { DiscountSchema } from "./Product.js";
 
 const ProductItemSchema = new Schema<OrderProductInfo>({
   productId: {

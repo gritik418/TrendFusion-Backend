@@ -1,5 +1,5 @@
 import { ApolloServer } from "@apollo/server";
-import product from "./product";
+import product from "./product/index.js";
 
 const gqlServer = new ApolloServer({
   typeDefs: product.typeDefs,

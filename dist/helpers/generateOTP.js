@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const crypto_1 = require("crypto");
+import { randomInt } from "crypto";
 const generateOTP = () => {
-    return (0, crypto_1.randomInt)(100000, 1000000);
+    return randomInt(100000, 1000000);
 };
-exports.default = generateOTP;
+export default generateOTP;

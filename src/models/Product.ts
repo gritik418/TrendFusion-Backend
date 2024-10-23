@@ -19,6 +19,11 @@ const OfferSchema = new Schema<Offers>({
   },
 });
 
+const SpecificationSchema = new Schema<Specifications>({
+  category: { type: String },
+  specs: [Schema.Types.Mixed],
+});
+
 const ColorSchema = new Schema<Color>({
   colorName: { type: String },
   colorImage: {
@@ -89,9 +94,7 @@ const ProductSchema = new Schema<Product>(
       type: String,
     },
     offers: [OfferSchema],
-    specifications: {
-      type: Schema.Types.Mixed,
-    },
+    specifications: [SpecificationSchema],
     isAvailable: {
       type: Boolean,
       default: true,

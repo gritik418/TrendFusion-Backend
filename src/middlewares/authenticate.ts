@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { TF_TOKEN } from "../constants/variables";
+import { TF_TOKEN } from "../constants/variables.js";
 
 const authenticate = async (
   req: Request,

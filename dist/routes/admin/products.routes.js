@@ -1,5 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const router = (0, express_1.Router)();
-exports.default = router;
+import adminAuth from "../../middlewares/adminAuth.js";
+import { Router } from "express";
+import { addProduct, verifyProductId, } from "../../controllers/admin/product.js";
+const router = Router();
+router.post("/check", adminAuth, verifyProductId);
+router.post("/add", adminAuth, addProduct);
+export default router;

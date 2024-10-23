@@ -1,24 +1,18 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.veriyEmail = exports.userSignup = exports.userLogin = void 0;
-const loginSchema_1 = __importDefault(require("../validators/loginSchema"));
-const User_1 = __importDefault(require("../models/User"));
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const variables_1 = require("../constants/variables");
-const options_1 = require("../constants/options");
-const signupSchema_1 = __importDefault(require("../validators/signupSchema"));
-const generateOTP_1 = __importDefault(require("../helpers/generateOTP"));
-const sendEmail_1 = __importDefault(require("../helpers/sendEmail"));
-const verificationTemplate_1 = __importDefault(require("../utils/verificationTemplate"));
-const verifyEmailSchema_1 = __importDefault(require("../validators/verifyEmailSchema"));
-const userLogin = async (req, res) => {
+import loginSchema from "../validators/loginSchema.js";
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { TF_TOKEN } from "../constants/variables.js";
+import { cookieOptions } from "../constants/options.js";
+import signupSchema from "../validators/signupSchema.js";
+import generateOTP from "../helpers/generateOTP.js";
+import sendEmail from "../helpers/sendEmail.js";
+import verificationTemplate from "../utils/verificationTemplate.js";
+import verifyEmailSchema from "../validators/verifyEmailSchema.js";
+export const userLogin = async (req, res) => {
     try {
         const { identifier, password } = req.body;
-        const result = loginSchema_1.default.safeParse({ identifier, password });
+        const result = loginSchema.safeParse({ identifier, password });
         if (!result.success) {
             if (result.error) {
                 const errors = {};
@@ -36,7 +30,7 @@ const userLogin = async (req, res) => {
                 message: "Something went wrong.",
             });
         }
-        const user = await User_1.default.findOne({
+        const user = await User.findOne({
             $or: [
                 {
                     email: result.data.identifier,
@@ -52,7 +46,7 @@ const userLogin = async (req, res) => {
                 message: "Invalid credentials.",
             });
         }
-        const verify = await bcryptjs_1.default.compare(result.data.password, user.password);
+        const verify = await bcrypt.compare(result.data.password, user.password);
         if (!verify) {
             return res.status(401).json({
                 success: false,
@@ -65,8 +59,8 @@ const userLogin = async (req, res) => {
             role: user.userRole,
         };
         console.log(payload);
-        const token = jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET);
-        return res.status(200).cookie(variables_1.TF_TOKEN, token, options_1.cookieOptions).json({
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
+        return res.status(200).cookie(TF_TOKEN, token, cookieOptions).json({
             success: true,
             message: "Logged in successfully.",
         });
@@ -78,11 +72,10 @@ const userLogin = async (req, res) => {
         });
     }
 };
-exports.userLogin = userLogin;
-const userSignup = async (req, res) => {
+export const userSignup = async (req, res) => {
     try {
         const { firstName, lastName, email, username, password, confirmPassword, } = req.body;
-        const result = signupSchema_1.default.safeParse({
+        const result = signupSchema.safeParse({
             firstName,
             lastName,
             email,
@@ -107,7 +100,7 @@ const userSignup = async (req, res) => {
                 message: "Something went wrong.",
             });
         }
-        const checkExistingEmail = await User_1.default.findOne({ email: result.data.email });
+        const checkExistingEmail = await User.findOne({ email: result.data.email });
         if (checkExistingEmail) {
             if (checkExistingEmail.isVerified) {
                 return res.status(401).json({
@@ -115,11 +108,11 @@ const userSignup = async (req, res) => {
                     message: "Account already exists.",
                 });
             }
-            await User_1.default.findOneAndDelete({
+            await User.findOneAndDelete({
                 email: result.data.email,
             });
         }
-        const checkUsername = await User_1.default.findOne({
+        const checkUsername = await User.findOne({
             username: result.data.username,
         });
         if (checkUsername) {
@@ -129,16 +122,16 @@ const userSignup = async (req, res) => {
                     message: "Username already taken.",
                 });
             }
-            await User_1.default.findOneAndDelete({
+            await User.findOneAndDelete({
                 username: result.data.username,
             });
         }
-        const salt = await bcryptjs_1.default.genSalt(10);
-        const hashedPassword = await bcryptjs_1.default.hash(result.data.password, salt);
-        const verificationCodeSalt = await bcryptjs_1.default.genSalt(8);
-        const verificationCode = (0, generateOTP_1.default)().toString();
-        const hashedCode = await bcryptjs_1.default.hash(verificationCode, verificationCodeSalt);
-        const user = new User_1.default({
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(result.data.password, salt);
+        const verificationCodeSalt = await bcrypt.genSalt(8);
+        const verificationCode = generateOTP().toString();
+        const hashedCode = await bcrypt.hash(verificationCode, verificationCodeSalt);
+        const user = new User({
             firstName: result.data.firstName,
             lastName: result.data.lastName || "",
             username: result.data.username,
@@ -148,11 +141,11 @@ const userSignup = async (req, res) => {
             verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
         });
         await user.save();
-        await (0, sendEmail_1.default)({
+        await sendEmail({
             from: "TrendFusion",
             to: result.data.email,
             subject: "Email Verification",
-            html: (0, verificationTemplate_1.default)(verificationCode),
+            html: verificationTemplate(verificationCode),
             text: `Please verify your Email addess. The otp for email verification is ${verificationCode}. The otp is valid onlf for 10 minutes.`,
         });
         return res.status(201).json({
@@ -167,11 +160,10 @@ const userSignup = async (req, res) => {
         });
     }
 };
-exports.userSignup = userSignup;
-const veriyEmail = async (req, res) => {
+export const veriyEmail = async (req, res) => {
     try {
         const { email, verificationCode } = req.body;
-        const result = verifyEmailSchema_1.default.safeParse({
+        const result = verifyEmailSchema.safeParse({
             email,
             verificationCode,
         });
@@ -192,7 +184,7 @@ const veriyEmail = async (req, res) => {
                 message: "Something went wrong.",
             });
         }
-        const user = await User_1.default.findOne({
+        const user = await User.findOne({
             email: result.data.email,
         });
         if (!user) {
@@ -203,21 +195,21 @@ const veriyEmail = async (req, res) => {
         }
         const isOTPValid = new Date(user.verificationCodeExpiry).getTime() > new Date().getTime();
         if (!isOTPValid) {
-            await User_1.default.findByIdAndDelete(user._id);
+            await User.findByIdAndDelete(user._id);
             return res.status(401).json({
                 success: false,
                 message: "OTP Expired.",
             });
         }
-        const verify = await bcryptjs_1.default.compare(result.data.verificationCode, user.verificationCode);
+        const verify = await bcrypt.compare(result.data.verificationCode, user.verificationCode);
         if (!verify) {
-            await User_1.default.findByIdAndDelete(user._id);
+            await User.findByIdAndDelete(user._id);
             return res.status(401).json({
                 success: false,
                 message: "Wrong OTP.",
             });
         }
-        await User_1.default.findByIdAndUpdate(user._id, {
+        await User.findByIdAndUpdate(user._id, {
             $set: {
                 isVerified: true,
                 verificationCode: null,
@@ -229,8 +221,8 @@ const veriyEmail = async (req, res) => {
             email: user.email,
             role: user.userRole,
         };
-        const token = jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET);
-        return res.status(200).cookie(variables_1.TF_TOKEN, token, options_1.cookieOptions).json({
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
+        return res.status(200).cookie(TF_TOKEN, token, cookieOptions).json({
             success: true,
             message: "Account verified successfully.",
         });
@@ -242,4 +234,3 @@ const veriyEmail = async (req, res) => {
         });
     }
 };
-exports.veriyEmail = veriyEmail;

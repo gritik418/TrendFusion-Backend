@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const typeDefs = `#graphql
     scalar JSON
 
@@ -40,4 +38,4 @@ const typeDefs = `#graphql
         product: Product
     }
 `;
-exports.default = typeDefs;
+export default typeDefs;

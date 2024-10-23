@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ADMIN_TF_TOKEN } from "../constants/variables";
+import { ADMIN_TF_TOKEN } from "../constants/variables.js";
 import jwt from "jsonwebtoken";
 
 export type AdminJWTPayload = {

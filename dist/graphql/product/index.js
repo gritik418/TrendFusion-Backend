@@ -1,12 +1,7 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const resolvers_1 = __importDefault(require("./resolvers"));
-const typedefs_1 = __importDefault(require("./typedefs"));
+import resolvers from "./resolvers.js";
+import typeDefs from "./typedefs.js";
 const product = {
-    typeDefs: typedefs_1.default,
-    resolvers: resolvers_1.default,
+    typeDefs,
+    resolvers,
 };
-exports.default = product;
+export default product;

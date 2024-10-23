@@ -1,4 +1,4 @@
-import Queries from "./queries";
+import Queries from "./queries.js";
 
 const resolvers = {
   Query: Queries,

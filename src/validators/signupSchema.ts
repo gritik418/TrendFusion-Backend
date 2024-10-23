@@ -3,7 +3,10 @@ import { z } from "zod";
 const signupSchema = z
   .object({
     firstName: z.string().min(3, "First name must be atleast 3 characters."),
-    lastName: z.any(),
+    lastName: z
+      .string()
+      .min(2, "Last name must be atleast 2 characters.")
+      .optional(),
     username: z.string().min(3, "Username must be atleast 3 characters."),
     email: z.string().email("Email must be valid."),
     password: z

@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import User from "../../models/User";
+import User from "../../models/User.js";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
-import { AdminJWTPayload } from "../../middlewares/adminAuth";
-import { ADMIN_TF_TOKEN } from "../../constants/variables";
-import { cookieOptions } from "../../constants/options";
+import { AdminJWTPayload } from "../../middlewares/adminAuth.js";
+import { ADMIN_TF_TOKEN } from "../../constants/variables.js";
+import { cookieOptions } from "../../constants/options.js";
 
 const loginSchema = z.object({
   email: z.string().email(),

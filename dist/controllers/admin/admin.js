@@ -1,14 +1,8 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAdmin = void 0;
-const User_1 = __importDefault(require("../../models/User"));
-const getAdmin = async (req, res) => {
+import User from "../../models/User.js";
+export const getAdmin = async (req, res) => {
     try {
         const adminId = req.params.adminId;
-        const admin = await User_1.default.findById(adminId).select({
+        const admin = await User.findById(adminId).select({
             verificationCodeExpiry: 0,
             verificationCode: 0,
             provider: 0,
@@ -30,4 +24,3 @@ const getAdmin = async (req, res) => {
         });
     }
 };
-exports.getAdmin = getAdmin;

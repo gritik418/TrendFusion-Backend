@@ -1,16 +1,11 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const variables_1 = require("../constants/variables");
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+import { ADMIN_TF_TOKEN } from "../constants/variables.js";
+import jwt from "jsonwebtoken";
 const adminAuth = (req, res, next) => {
     try {
-        const token = req.cookies[variables_1.ADMIN_TF_TOKEN];
+        const token = req.cookies[ADMIN_TF_TOKEN];
         if (!token)
             throw new Error("Please Login.");
-        const verify = jsonwebtoken_1.default.verify(token, process.env.ADMIN_JWT_SECRET);
+        const verify = jwt.verify(token, process.env.ADMIN_JWT_SECRET);
         if (!verify)
             throw new Error("Please Login.");
         if (verify.role !== "admin")
@@ -27,4 +22,4 @@ const adminAuth = (req, res, next) => {
         });
     }
 };
-exports.default = adminAuth;
+export default adminAuth;

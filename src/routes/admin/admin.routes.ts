@@ -6,7 +6,7 @@ import { getAdmin } from "../../controllers/admin/admin.js";
 
 const router = Router();
 
-router.use("/products", productRoutes);
+router.use("/product", productRoutes);
 router.use("/auth", authRoutes);
 
 router.get("/", adminAuth, getAdmin);

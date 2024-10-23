@@ -1,17 +1,17 @@
 import { Request, Response } from "express";
-import loginSchema, { LoginDataType } from "../validators/loginSchema";
-import User from "../models/User";
+import loginSchema, { LoginDataType } from "../validators/loginSchema.js";
+import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { TF_TOKEN } from "../constants/variables";
-import { cookieOptions } from "../constants/options";
-import signupSchema, { SignupDataType } from "../validators/signupSchema";
-import generateOTP from "../helpers/generateOTP";
-import sendEmail from "../helpers/sendEmail";
-import verificationTemplate from "../utils/verificationTemplate";
+import { TF_TOKEN } from "../constants/variables.js";
+import { cookieOptions } from "../constants/options.js";
+import signupSchema, { SignupDataType } from "../validators/signupSchema.js";
+import generateOTP from "../helpers/generateOTP.js";
+import sendEmail from "../helpers/sendEmail.js";
+import verificationTemplate from "../utils/verificationTemplate.js";
 import verifyEmailSchema, {
   VerifyEmailDataType,
-} from "../validators/verifyEmailSchema";
+} from "../validators/verifyEmailSchema.js";
 
 export const userLogin = async (req: Request, res: Response) => {
   try {
