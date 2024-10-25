@@ -4,7 +4,11 @@ export const getProductSuggestions = async (req, res) => {
         const searchQuery = req.query["searchQuery"];
         const suggestions = [];
         const products = await Product.find({
-            $or: [{ title: { $regex: searchQuery, $options: "i" } }],
+            $or: [
+                { title: { $regex: searchQuery, $options: "i" } },
+                { brand: { $regex: searchQuery, $options: "i" } },
+                { category: { $regex: searchQuery, $options: "i" } },
+            ],
         }).select({ brand: 1, title: 1, _id: 0 });
         products.forEach(({ brand, title }) => {
             if (!suggestions.includes(brand)) {
@@ -28,8 +32,18 @@ export const getProductSuggestions = async (req, res) => {
 };
 export const searchProduct = async (req, res) => {
     try {
+        const searchQuery = req.query["searchQuery"];
+        const products = await Product.find({
+            $or: [
+                { title: { $regex: searchQuery, $options: "i" } },
+                { brand: { $regex: searchQuery, $options: "i" } },
+                { description: { $regex: searchQuery, $options: "i" } },
+                { category: { $regex: searchQuery, $options: "i" } },
+            ],
+        });
         return res.status(200).json({
             success: true,
+            data: products,
         });
     }
     catch (error) {

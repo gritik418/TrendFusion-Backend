@@ -7,7 +7,11 @@ export const getProductSuggestions = async (req: Request, res: Response) => {
     const suggestions: string[] = [];
 
     const products = await Product.find({
-      $or: [{ title: { $regex: searchQuery, $options: "i" } }],
+      $or: [
+        { title: { $regex: searchQuery, $options: "i" } },
+        { brand: { $regex: searchQuery, $options: "i" } },
+        { category: { $regex: searchQuery, $options: "i" } },
+      ],
     }).select({ brand: 1, title: 1, _id: 0 });
 
     products.forEach(({ brand, title }) => {
@@ -33,8 +37,19 @@ export const getProductSuggestions = async (req: Request, res: Response) => {
 
 export const searchProduct = async (req: Request, res: Response) => {
   try {
+    const searchQuery = req.query["searchQuery"];
+    const products = await Product.find({
+      $or: [
+        { title: { $regex: searchQuery, $options: "i" } },
+        { brand: { $regex: searchQuery, $options: "i" } },
+        { description: { $regex: searchQuery, $options: "i" } },
+        { category: { $regex: searchQuery, $options: "i" } },
+      ],
+    });
+
     return res.status(200).json({
       success: true,
+      data: products,
     });
   } catch (error) {
     return res.status(500).json({
