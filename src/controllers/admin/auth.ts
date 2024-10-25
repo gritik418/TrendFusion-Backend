@@ -9,7 +9,7 @@ import { cookieOptions } from "../../constants/options.js";
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(8, "Password must be atleast 8 characters."),
 });
 
 export const adminLogin = async (req: Request, res: Response) => {

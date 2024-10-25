@@ -17,13 +17,13 @@ const specificationSchema = z.object({
     specs: z.any(),
 });
 const productSchema = z.object({
-    productId: z.string().min(3),
+    productId: z.string().min(8, "Product Id must contain atleast 8 characters."),
     brand: z.string().optional(),
-    title: z.string().min(10),
-    description: z.string().min(20),
+    title: z.string().min(10, "Title must be atleast 10 characters."),
+    description: z.string().min(20, "Description must be atleast 20 characters."),
     isAvailable: z.boolean(),
-    stock: z.number().min(0),
-    price: z.number().min(1),
+    stock: z.number().min(0, "Stock must not be negative."),
+    price: z.number().min(1, "Price must not be 0"),
     category: z.string().optional(),
     warranty: z.string().optional(),
     highlights: z.string().array().optional(),

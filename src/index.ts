@@ -6,6 +6,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import productRoutes from "./routes/product.routes.js";
 import adminRoutes from "./routes/admin/admin.routes.js";
 
 const app = express();
@@ -31,6 +32,7 @@ initGraphQLServer();
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/product", productRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.listen(PORT, () => {

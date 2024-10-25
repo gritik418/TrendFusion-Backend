@@ -1,5 +1,5 @@
 import { Router } from "express";
-import productRoutes from "./products.routes.js";
+import productRoutes from "./product.routes.js";
 import authRoutes from "./auth.routes.js";
 import adminAuth from "../../middlewares/adminAuth.js";
 import { getAdmin } from "../../controllers/admin/admin.js";

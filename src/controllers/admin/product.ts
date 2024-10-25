@@ -5,6 +5,7 @@ import Product from "../../models/Product.js";
 export const verifyProductId = async (req: Request, res: Response) => {
   try {
     const productId: string | null = req.body.productId;
+
     if (!productId)
       return res.status(400).json({
         success: false,
