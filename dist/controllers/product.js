@@ -43,7 +43,7 @@ export const searchProduct = async (req, res) => {
         });
         return res.status(200).json({
             success: true,
-            data: products,
+            products,
         });
     }
     catch (error) {
@@ -64,6 +64,41 @@ export const getProductById = async (req, res) => {
         const product = await Product.findOne({
             productId,
         });
+        const variants = {};
+        if (product && product.title && product.color && product.size) {
+            const variantProducts = await Product.find({ title: product.title });
+            variantProducts.forEach((product) => {
+                if (product.color) {
+                    if (!Object.keys(variants).includes(product.color.colorName)) {
+                        variants[product.color.colorName] = {
+                            colorName: product.color.colorName,
+                            colorImage: product.color.colorImage,
+                            size: [],
+                        };
+                        if (!variants[product.color.colorName].size?.includes({
+                            slug: product.productId,
+                            size: product.size || "",
+                        })) {
+                            variants[product.color.colorName].size?.push({
+                                size: product.size || "",
+                                slug: product.productId,
+                            });
+                        }
+                    }
+                    else {
+                        if (!variants[product.color.colorName].size?.includes({
+                            slug: product.productId,
+                            size: product.size || "",
+                        })) {
+                            variants[product.color.colorName].size?.push({
+                                size: product.size || "",
+                                slug: product.productId,
+                            });
+                        }
+                    }
+                }
+            });
+        }
         if (!product)
             return res.status(200).json({
                 success: false,
@@ -71,7 +106,8 @@ export const getProductById = async (req, res) => {
             });
         return res.status(200).json({
             success: true,
-            data: product,
+            product,
+            variants: Object.values(variants),
         });
     }
     catch (error) {

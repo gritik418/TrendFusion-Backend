@@ -43,7 +43,9 @@ const CartSchema = new Schema({
         required: true,
     },
     items: [CartItemSchema],
-    discount: DiscountSchema,
+    discount: {
+        type: Number,
+    },
     finalPrice: {
         type: Number,
         required: true,

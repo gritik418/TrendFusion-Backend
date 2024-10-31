@@ -77,9 +77,9 @@ interface Order {
 
 interface Cart {
   userId: Types.ObjectId;
-  items: string[] | CartItem[];
+  items: CartItem[];
   totalPrice: number;
-  discount?: Discount;
+  discount?: number;
   finalPrice: number;
   totalQuantity: number;
 }

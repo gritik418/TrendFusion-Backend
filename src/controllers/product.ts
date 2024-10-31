@@ -1,6 +1,17 @@
 import { Request, Response } from "express";
 import Product from "../models/Product.js";
 
+type VariantSize = {
+  size: string;
+  slug: string;
+};
+
+type Variant = {
+  colorImage: string;
+  colorName: string;
+  size?: VariantSize[];
+};
+
 export const getProductSuggestions = async (req: Request, res: Response) => {
   try {
     const searchQuery = req.query["searchQuery"];
@@ -49,7 +60,7 @@ export const searchProduct = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      data: products,
+      products,
     });
   } catch (error) {
     return res.status(500).json({
@@ -72,6 +83,46 @@ export const getProductById = async (req: Request, res: Response) => {
       productId,
     });
 
+    const variants: { [name: string]: Variant } = {};
+
+    if (product && product.title && product.color && product.size) {
+      const variantProducts = await Product.find({ title: product.title });
+      variantProducts.forEach((product: Product) => {
+        if (product.color) {
+          if (!Object.keys(variants).includes(product.color.colorName)) {
+            variants[product.color.colorName] = {
+              colorName: product.color.colorName,
+              colorImage: product.color.colorImage,
+              size: [],
+            };
+            if (
+              !variants[product.color.colorName].size?.includes({
+                slug: product.productId,
+                size: product.size || "",
+              })
+            ) {
+              variants[product.color.colorName].size?.push({
+                size: product.size || "",
+                slug: product.productId,
+              });
+            }
+          } else {
+            if (
+              !variants[product.color.colorName].size?.includes({
+                slug: product.productId,
+                size: product.size || "",
+              })
+            ) {
+              variants[product.color.colorName].size?.push({
+                size: product.size || "",
+                slug: product.productId,
+              });
+            }
+          }
+        }
+      });
+    }
+
     if (!product)
       return res.status(200).json({
         success: false,
@@ -80,7 +131,8 @@ export const getProductById = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      data: product,
+      product,
+      variants: Object.values(variants),
     });
   } catch (error) {
     return res.status(500).json({
