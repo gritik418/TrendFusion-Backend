@@ -69,7 +69,6 @@ export const userLogin = async (req: Request, res: Response) => {
       email: user.email,
       role: user.userRole,
     };
-    console.log(payload);
     const token = jwt.sign(payload, process.env.JWT_SECRET!);
 
     return res.status(200).cookie(TF_TOKEN, token, cookieOptions).json({

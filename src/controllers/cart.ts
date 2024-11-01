@@ -2,6 +2,35 @@ import { Request, Response } from "express";
 import User from "../models/User.js";
 import Cart from "../models/Cart.js";
 
+export const getCart = async (req: Request, res: Response) => {
+  try {
+    const userId: string = req.params.userId;
+    if (!userId)
+      return res.status(401).json({
+        success: false,
+        message: "User not found.",
+      });
+
+    const cart = await Cart.findOne({ userId });
+    if (!cart)
+      return res.status(200).json({
+        success: true,
+        message: "Cart is Empty.",
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Cart is Empty.",
+      cart,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error.",
+    });
+  }
+};
+
 export const addToCart = async (req: Request, res: Response) => {
   try {
     const userId: string = req.params.userId;
@@ -39,7 +68,7 @@ export const addToCart = async (req: Request, res: Response) => {
     let duplicateProduct: CartItem | undefined;
 
     checkCart?.items.forEach((item: CartItem) => {
-      if (item.productId === product.productId) {
+      if (item.productId.toString() === product.productId) {
         alreadyAdded = true;
         duplicateProduct = item;
       }
@@ -48,7 +77,7 @@ export const addToCart = async (req: Request, res: Response) => {
     if (checkCart) {
       if (alreadyAdded && duplicateProduct?.productId) {
         const filteredItems = checkCart.items.filter(
-          (item: CartItem) => item.productId !== product.productId
+          (item: CartItem) => item.productId.toString() !== product.productId
         );
 
         const cartItems = [
@@ -59,7 +88,7 @@ export const addToCart = async (req: Request, res: Response) => {
           },
         ];
 
-        await Cart.findByIdAndUpdate(
+        await Cart.findOneAndUpdate(
           { userId },
           {
             $set: {

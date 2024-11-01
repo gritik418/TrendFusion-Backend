@@ -1,5 +1,11 @@
 import mongoose, { model, Schema } from "mongoose";
 import { DiscountSchema } from "./Product.js";
+const ColorSchema = new Schema({
+    colorName: { type: String },
+    colorImage: {
+        type: String,
+    },
+});
 const CartItemSchema = new Schema({
     productId: {
         type: Schema.Types.ObjectId,
@@ -20,9 +26,7 @@ const CartItemSchema = new Schema({
         type: Number,
         default: 1,
     },
-    color: {
-        type: String,
-    },
+    color: ColorSchema,
     size: {
         type: String,
     },

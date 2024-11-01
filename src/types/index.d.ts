@@ -126,7 +126,7 @@ interface CartItem {
   stock: number;
   unitPrice: number;
   unitDiscount?: Discount;
-  color?: string;
+  color?: Color;
   size?: string;
 }
 

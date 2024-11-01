@@ -1,5 +1,32 @@
 import User from "../models/User.js";
 import Cart from "../models/Cart.js";
+export const getCart = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        if (!userId)
+            return res.status(401).json({
+                success: false,
+                message: "User not found.",
+            });
+        const cart = await Cart.findOne({ userId });
+        if (!cart)
+            return res.status(200).json({
+                success: true,
+                message: "Cart is Empty.",
+            });
+        return res.status(200).json({
+            success: true,
+            message: "Cart is Empty.",
+            cart,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Server Error.",
+        });
+    }
+};
 export const addToCart = async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -31,14 +58,14 @@ export const addToCart = async (req, res) => {
         let alreadyAdded = false;
         let duplicateProduct;
         checkCart?.items.forEach((item) => {
-            if (item.productId === product.productId) {
+            if (item.productId.toString() === product.productId) {
                 alreadyAdded = true;
                 duplicateProduct = item;
             }
         });
         if (checkCart) {
             if (alreadyAdded && duplicateProduct?.productId) {
-                const filteredItems = checkCart.items.filter((item) => item.productId !== product.productId);
+                const filteredItems = checkCart.items.filter((item) => item.productId.toString() !== product.productId);
                 const cartItems = [
                     ...filteredItems,
                     {
@@ -46,7 +73,7 @@ export const addToCart = async (req, res) => {
                         quantity: (duplicateProduct.quantity += 1),
                     },
                 ];
-                await Cart.findByIdAndUpdate({ userId }, {
+                await Cart.findOneAndUpdate({ userId }, {
                     $set: {
                         items: cartItems,
                         totalPrice: checkCart.totalPrice + product.unitPrice,
