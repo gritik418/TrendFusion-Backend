@@ -12,6 +12,7 @@ import verificationTemplate from "../utils/verificationTemplate.js";
 import verifyEmailSchema, {
   VerifyEmailDataType,
 } from "../validators/verifyEmailSchema.js";
+import { JWTPayload } from "../types/index.js";
 
 export const userLogin = async (req: Request, res: Response) => {
   try {
@@ -65,7 +66,7 @@ export const userLogin = async (req: Request, res: Response) => {
     }
 
     const payload: JWTPayload = {
-      id: user._id.toString(),
+      id: user._id!.toString(),
       email: user.email,
       role: user.userRole,
     };
@@ -259,7 +260,7 @@ export const veriyEmail = async (req: Request, res: Response) => {
     });
 
     const payload: JWTPayload = {
-      id: user._id.toString(),
+      id: user._id!.toString(),
       email: user.email,
       role: user.userRole,
     };

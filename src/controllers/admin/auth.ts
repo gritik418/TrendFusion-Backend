@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import { AdminJWTPayload } from "../../middlewares/adminAuth.js";
 import { ADMIN_TF_TOKEN } from "../../constants/variables.js";
 import { cookieOptions } from "../../constants/options.js";
+import { UserType } from "../../types/index.js";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -37,7 +38,7 @@ export const adminLogin = async (req: Request, res: Response) => {
       });
     }
 
-    const admin = await User.findOne({
+    const admin: UserType | null = await User.findOne({
       email: result.data.email,
       isVerified: true,
       userRole: "admin",
@@ -57,7 +58,7 @@ export const adminLogin = async (req: Request, res: Response) => {
 
     const payload: AdminJWTPayload = {
       email: admin.email,
-      id: admin._id.toString(),
+      id: admin._id!.toString(),
       role: admin.userRole,
     };
     const token = jwt.sign(payload, process.env.ADMIN_JWT_SECRET!);

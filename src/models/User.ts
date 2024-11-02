@@ -1,4 +1,5 @@
 import mongoose, { model, Model, Schema, Types } from "mongoose";
+import { DeliveryAddress, UserType } from "../types/index.js";
 
 const AddressSchema = new Schema<DeliveryAddress>({
   firstName: { type: String, required: true },
@@ -13,7 +14,7 @@ const AddressSchema = new Schema<DeliveryAddress>({
   phoneNumber: [{ type: String }],
 });
 
-const UserSchema = new Schema<User>(
+const UserSchema = new Schema<UserType>(
   {
     firstName: {
       type: String,
@@ -84,6 +85,7 @@ const UserSchema = new Schema<User>(
 );
 
 const User =
-  (mongoose.models.User as Model<User>) || model<User>("User", UserSchema);
+  (mongoose.models.User as Model<UserType>) ||
+  model<UserType>("User", UserSchema);
 
 export default User;

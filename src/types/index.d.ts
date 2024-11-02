@@ -1,4 +1,6 @@
-interface User {
+import { Document } from "mongoose";
+
+interface UserType extends Document {
   firstName: string;
   lastName?: string;
   email: string;
@@ -17,7 +19,7 @@ interface User {
   orderHistory: Types.ObjectId[];
 }
 
-interface Product {
+interface ProductType extends Document {
   productId: string;
   title: string;
   brand?: string;
@@ -53,7 +55,7 @@ type Color = {
   colorImage: string;
 };
 
-interface Order {
+interface OrderType extends Document {
   orderId: string;
   userId: Types.ObjectId;
   orderDate: Date;
@@ -75,16 +77,18 @@ interface Order {
   trackingId?: string;
 }
 
-interface Cart {
+interface CartType extends Document {
   userId: Types.ObjectId;
   items: CartItem[];
   totalPrice: number;
   discount?: number;
   finalPrice: number;
   totalQuantity: number;
+  deliveryCharges?: number;
+  platformFee?: number;
 }
 
-interface Reviews {
+interface ReviewsType extends Document {
   userId: Types.ObjectId;
   productId: Types.ObjectId;
   rating: number;
@@ -118,16 +122,8 @@ interface OrderProductInfo {
 }
 
 interface CartItem {
-  productId: Types.ObjectId;
-  title: string;
-  brand: string;
-  thumbnail: string;
+  product: Types.ObjectId[];
   quantity: number;
-  stock: number;
-  unitPrice: number;
-  unitDiscount?: Discount;
-  color?: Color;
-  size?: string;
 }
 
 interface Specifications {

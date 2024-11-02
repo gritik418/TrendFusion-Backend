@@ -128,5 +128,6 @@ const OrderSchema = new Schema({
         unique: true,
     },
 }, { timestamps: true });
-const Order = mongoose.models.Order || model("Order", OrderSchema);
+const Order = mongoose.models.Order ||
+    model("Order", OrderSchema);
 export default Order;

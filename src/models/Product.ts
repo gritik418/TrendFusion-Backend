@@ -1,4 +1,11 @@
 import mongoose, { model, Model, Schema } from "mongoose";
+import {
+  Color,
+  Discount,
+  Offers,
+  ProductType,
+  Specifications,
+} from "../types/index.js";
 
 export const DiscountSchema = new Schema<Discount>({
   description: { type: String },
@@ -31,7 +38,7 @@ const ColorSchema = new Schema<Color>({
   },
 });
 
-const ProductSchema = new Schema<Product>(
+const ProductSchema = new Schema<ProductType>(
   {
     productId: {
       type: String,
@@ -104,7 +111,7 @@ const ProductSchema = new Schema<Product>(
 );
 
 const Product =
-  (mongoose.models.Product as Model<Product>) ||
-  model<Product>("Product", ProductSchema);
+  (mongoose.models.Product as Model<ProductType>) ||
+  model<ProductType>("Product", ProductSchema);
 
 export default Product;

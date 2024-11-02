@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import User from "../models/User.js";
 import Cart from "../models/Cart.js";
+import Product from "../models/Product.js";
+import { ProductType } from "../types/index.js";
 
 export const getCart = async (req: Request, res: Response) => {
   try {
@@ -34,99 +35,163 @@ export const getCart = async (req: Request, res: Response) => {
 export const addToCart = async (req: Request, res: Response) => {
   try {
     const userId: string = req.params.userId;
-    const product: CartItem = req.body.product;
+    const productId: string = req.body.productId;
+    const quantity: number = req.body.quantity || 1;
 
-    if (!product)
+    const product: ProductType | null = await Product.findById(productId);
+
+    if (!product || !productId)
       return res.status(400).json({
         success: false,
         message: "Product not found.",
       });
 
-    const user = await User.findById(userId);
-    let discount = 0;
-    if (product?.unitDiscount) {
-      if (product.unitDiscount.discountType === "Percentage") {
-        discount = (product.unitPrice * product.unitDiscount.value) / 100;
-      } else {
-        discount = product.unitDiscount.value;
-      }
-    }
-
-    if (!user)
-      return res.status(401).json({
-        success: false,
-        message: "User not found.",
-      });
-
     const checkCart = await Cart.findOne({ userId });
 
-    const cartDiscount = checkCart?.discount
-      ? (checkCart.discount += discount)
-      : discount;
-
-    let alreadyAdded = false;
-    let duplicateProduct: CartItem | undefined;
-
-    checkCart?.items.forEach((item: CartItem) => {
-      if (item.productId.toString() === product.productId) {
-        alreadyAdded = true;
-        duplicateProduct = item;
-      }
-    });
-
-    if (checkCart) {
-      if (alreadyAdded && duplicateProduct?.productId) {
-        const filteredItems = checkCart.items.filter(
-          (item: CartItem) => item.productId.toString() !== product.productId
-        );
-
-        const cartItems = [
-          ...filteredItems,
-          {
-            ...duplicateProduct,
-            quantity: (duplicateProduct.quantity += 1),
-          },
-        ];
-
-        await Cart.findOneAndUpdate(
-          { userId },
-          {
-            $set: {
-              items: cartItems,
-              totalPrice: checkCart.totalPrice + product.unitPrice,
-              discount: cartDiscount,
-              finalPrice: checkCart.finalPrice + (product.unitPrice - discount),
-              totalQuantity: checkCart.totalQuantity + product.quantity,
-            },
-          }
-        );
-      } else {
-        await Cart.findOneAndUpdate(
-          { userId },
-          {
-            $push: { items: product },
-            $set: {
-              totalPrice: checkCart.totalPrice + product.unitPrice,
-              discount: cartDiscount,
-              finalPrice: checkCart.finalPrice + (product.unitPrice - discount),
-              totalQuantity: checkCart.totalQuantity + product.quantity,
-            },
-          }
-        );
-      }
-    } else {
+    if (!checkCart) {
       const newCart = new Cart({
         userId,
-        discount,
-        totalPrice: product.unitPrice,
-        finalPrice: product.unitPrice - discount,
-        items: [product],
-        totalQuantity: product.quantity,
+        items: [{ product: productId, quantity: quantity }],
+        totalQuantity: quantity,
       });
 
       await newCart.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Added to Cart.",
+      });
     }
 
+    let alreadyAdded = false;
+    let duplicateProduct;
+    let addedQuantity = 0;
+
+    checkCart?.items.forEach((item: any) => {
+      if (item.product.toString() === product._id!.toString()) {
+        alreadyAdded = true;
+        duplicateProduct = item.product;
+        addedQuantity = item.quantity;
+      }
+    });
+
+    if (product?.stock! < addedQuantity + quantity) {
+      return res.status(200).json({
+        success: true,
+        message: "Stock not available.",
+      });
+    }
+
+    if (alreadyAdded && duplicateProduct) {
+      const filteredItems = checkCart.items.filter(
+        (item: any) => item.product.toString() !== product._id!.toString()
+      );
+
+      const cartItems = [
+        ...filteredItems,
+        {
+          product: duplicateProduct,
+          quantity: (addedQuantity += quantity),
+        },
+      ];
+
+      await Cart.findOneAndUpdate(
+        { userId },
+        {
+          $set: {
+            items: cartItems,
+            totalQuantity: checkCart.totalQuantity + quantity,
+          },
+        }
+      );
+    } else {
+      await Cart.findOneAndUpdate(
+        { userId },
+        {
+          $push: { items: { product: product._id, quantity } },
+          $set: {
+            totalQuantity: checkCart.totalQuantity + quantity,
+          },
+        }
+      );
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Added to Cart.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error.",
+    });
+  }
+};
+
+export const incrementProductQuantity = async (req: Request, res: Response) => {
+  try {
+    const userId: string = req.params.userId;
+    const productId: string = req.params.productId;
+
+    const product: ProductType | null = await Product.findById(productId);
+    if (!productId || !product)
+      return res.status(400).json({
+        success: false,
+        message: "Product not found.",
+      });
+
+    const cart = await Cart.findOne({ userId });
+
+    if (!cart)
+      return res.status(400).json({
+        success: false,
+        message: "Cart not found.",
+      });
+
+    let duplicateProduct;
+    let addedQuantity = 0;
+
+    cart?.items.forEach((item: any) => {
+      if (item.product.toString() === product?._id!.toString()) {
+        duplicateProduct = item.product;
+        addedQuantity = item.quantity;
+      }
+    });
+
+    if (!duplicateProduct) {
+      return res.status(400).json({
+        success: false,
+        message: "Product not found.",
+      });
+    }
+
+    if (product?.stock! < addedQuantity + 1) {
+      return res.status(200).json({
+        success: true,
+        message: "Stock not available.",
+      });
+    }
+    const filteredItems =
+      cart?.items.filter(
+        (item: any) => item.product.toString() !== product._id!.toString()
+      ) || [];
+
+    const cartItems = [
+      ...filteredItems,
+      {
+        product: duplicateProduct,
+        quantity: addedQuantity + 1,
+      },
+    ];
+    await Cart.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          items: cartItems,
+          totalQuantity: cart.totalQuantity + 1,
+        },
+      }
+    );
     return res.status(200).json({
       success: true,
       message: "Added to Cart.",

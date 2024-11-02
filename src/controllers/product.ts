@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Product from "../models/Product.js";
+import { ProductType } from "../types/index.js";
 
 type VariantSize = {
   size: string;
@@ -87,7 +88,7 @@ export const getProductById = async (req: Request, res: Response) => {
 
     if (product && product.title && product.color && product.size) {
       const variantProducts = await Product.find({ title: product.title });
-      variantProducts.forEach((product: Product) => {
+      variantProducts.forEach((product: ProductType) => {
         if (product.color) {
           if (!Object.keys(variants).includes(product.color.colorName)) {
             variants[product.color.colorName] = {

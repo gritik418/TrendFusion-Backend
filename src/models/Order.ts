@@ -1,5 +1,10 @@
 import mongoose, { model, Model, Schema } from "mongoose";
 import { DiscountSchema } from "./Product.js";
+import {
+  DeliveryAddress,
+  OrderProductInfo,
+  OrderType,
+} from "../types/index.js";
 
 const ProductItemSchema = new Schema<OrderProductInfo>({
   productId: {
@@ -73,7 +78,7 @@ const DeliveryAddressSchema = new Schema<DeliveryAddress>({
   },
 });
 
-const OrderSchema = new Schema<Order>(
+const OrderSchema = new Schema<OrderType>(
   {
     orderId: {
       type: String,
@@ -136,6 +141,7 @@ const OrderSchema = new Schema<Order>(
 );
 
 const Order =
-  (mongoose.models.Order as Model<Order>) || model<Order>("Order", OrderSchema);
+  (mongoose.models.Order as Model<OrderType>) ||
+  model<OrderType>("Order", OrderSchema);
 
 export default Order;

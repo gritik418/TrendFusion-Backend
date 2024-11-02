@@ -1,6 +1,7 @@
 import mongoose, { model, Model, Schema } from "mongoose";
+import { ReviewsType } from "../types/index.js";
 
-const ReviewsSchema = new Schema<Reviews>(
+const ReviewsSchema = new Schema<ReviewsType>(
   {
     productId: {
       type: Schema.Types.ObjectId,
@@ -32,7 +33,7 @@ const ReviewsSchema = new Schema<Reviews>(
 );
 
 const Reviews =
-  (mongoose.models.Reviews as Model<Reviews>) ||
-  model<Reviews>("Reviews", ReviewsSchema);
+  (mongoose.models.Reviews as Model<ReviewsType>) ||
+  model<ReviewsType>("Reviews", ReviewsSchema);
 
 export default Reviews;
