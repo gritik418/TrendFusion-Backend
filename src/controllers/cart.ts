@@ -203,3 +203,80 @@ export const incrementProductQuantity = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const decrementProductQuantity = async (req: Request, res: Response) => {
+  try {
+    const userId: string = req.params.userId;
+    const productId: string = req.params.productId;
+
+    const product: ProductType | null = await Product.findById(productId);
+    if (!productId || !product)
+      return res.status(400).json({
+        success: false,
+        message: "Product not found.",
+      });
+
+    const cart = await Cart.findOne({ userId });
+
+    if (!cart)
+      return res.status(400).json({
+        success: false,
+        message: "Cart not found.",
+      });
+
+    let duplicateProduct;
+    let addedQuantity = 0;
+
+    cart?.items.forEach((item: any) => {
+      if (item.product.toString() === product?._id!.toString()) {
+        duplicateProduct = item.product;
+        addedQuantity = item.quantity;
+      }
+    });
+
+    if (addedQuantity === 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity is 1 cannot decrement.",
+      });
+    }
+
+    if (!duplicateProduct) {
+      return res.status(400).json({
+        success: false,
+        message: "Product not found.",
+      });
+    }
+
+    const filteredItems =
+      cart?.items.filter(
+        (item: any) => item.product.toString() !== product._id!.toString()
+      ) || [];
+
+    const cartItems = [
+      ...filteredItems,
+      {
+        product: duplicateProduct,
+        quantity: addedQuantity - 1,
+      },
+    ];
+    await Cart.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          items: cartItems,
+          totalQuantity: cart.totalQuantity - 1,
+        },
+      }
+    );
+    return res.status(200).json({
+      success: true,
+      message: "Quantity decremented.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error.",
+    });
+  }
+};
