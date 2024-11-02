@@ -5,6 +5,7 @@ import {
   decrementProductQuantity,
   getCart,
   incrementProductQuantity,
+  removeFromCart,
 } from "../controllers/cart.js";
 
 const router = Router();
@@ -16,5 +17,7 @@ router.post("/add", authenticate, addToCart);
 router.patch("/inc/:productId", authenticate, incrementProductQuantity);
 
 router.patch("/dec/:productId", authenticate, decrementProductQuantity);
+
+router.patch("/remove/:productId", authenticate, removeFromCart);
 
 export default router;

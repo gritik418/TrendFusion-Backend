@@ -227,3 +227,52 @@ export const decrementProductQuantity = async (req, res) => {
         });
     }
 };
+export const removeFromCart = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const productId = req.params.productId;
+        const product = await Product.findById(productId);
+        if (!productId || !product)
+            return res.status(400).json({
+                success: false,
+                message: "Product not found.",
+            });
+        const cart = await Cart.findOne({ userId });
+        if (!cart)
+            return res.status(400).json({
+                success: false,
+                message: "Cart not found.",
+            });
+        let productToBeRemoved;
+        let addedQuantity = 0;
+        cart?.items.forEach((item) => {
+            if (item.product.toString() === product?._id.toString()) {
+                productToBeRemoved = item.product;
+                addedQuantity = item.quantity;
+            }
+        });
+        if (!productToBeRemoved) {
+            return res.status(400).json({
+                success: false,
+                message: "Product not found.",
+            });
+        }
+        const filteredItems = cart?.items.filter((item) => item.product.toString() !== product._id.toString()) || [];
+        await Cart.findOneAndUpdate({ userId }, {
+            $set: {
+                items: filteredItems,
+                totalQuantity: cart.totalQuantity - addedQuantity,
+            },
+        });
+        return res.status(200).json({
+            success: true,
+            message: "Item removed.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Server Error.",
+        });
+    }
+};
