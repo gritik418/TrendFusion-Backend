@@ -8,16 +8,53 @@ export const getCart = async (req, res) => {
                 success: false,
                 message: "User not found.",
             });
-        const cart = await Cart.findOne({ userId });
+        const cart = await Cart.findOne({ userId }).populate("items.product", {
+            productId: 1,
+            title: 1,
+            brand: 1,
+            thumbnail: 1,
+            quantity: 1,
+            stock: 1,
+            price: 1,
+            discount: 1,
+            color: 1,
+            size: 1,
+        });
         if (!cart)
             return res.status(200).json({
                 success: true,
                 message: "Cart is Empty.",
             });
+        let totalQuantity = 0;
+        let totalPrice = 0;
+        let finalPrice = 0;
+        let discount = 0;
+        let deliveryCharges = 0;
+        let platformFee = 0;
+        cart.items.forEach((item) => {
+            let productDiscount = 0;
+            if (item.product.discount?.discountType === "Percentage") {
+                productDiscount =
+                    ((item.product.price * item.product.discount.value) / 100) *
+                        item.quantity;
+            }
+            discount += productDiscount;
+            totalQuantity += item.quantity;
+            totalPrice += item.product.price * item.quantity;
+            finalPrice += item.product.price * item.quantity - productDiscount;
+        });
         return res.status(200).json({
             success: true,
-            message: "Cart is Empty.",
-            cart,
+            cart: {
+                userId: cart.userId,
+                items: cart.items,
+                totalPrice,
+                totalQuantity,
+                finalPrice,
+                discount,
+                deliveryCharges,
+                platformFee,
+            },
         });
     }
     catch (error) {
