@@ -1,5 +1,5 @@
 import mongoose, { model, Model, Schema } from "mongoose";
-import { CartType, Color } from "../types/index.js";
+import { CartType } from "../types/index.js";
 
 const CartSchema = new Schema<CartType>(
   {
@@ -17,6 +17,10 @@ const CartSchema = new Schema<CartType>(
         quantity: {
           type: Number,
           default: 1,
+        },
+        updatedAt: {
+          type: Date,
+          default: Date.now,
         },
       },
     ],

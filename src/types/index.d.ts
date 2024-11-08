@@ -124,6 +124,7 @@ interface OrderProductInfo {
 interface CartItem {
   product: Types.ObjectId[];
   quantity: number;
+  updatedAt: Date;
 }
 
 interface Specifications {

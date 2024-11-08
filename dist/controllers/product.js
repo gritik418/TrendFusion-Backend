@@ -33,6 +33,74 @@ export const getProductSuggestions = async (req, res) => {
 export const searchProduct = async (req, res) => {
     try {
         const searchQuery = req.query["searchQuery"];
+        const category = req.query["category"];
+        const brands = req.query["brand"];
+        const colors = req.query["color"];
+        const size = req.query["size"];
+        const min = req.query["min"];
+        const max = req.query["max"];
+        let filterQueries = {
+            brands: [],
+            categories: [],
+            colors: [],
+            size: [],
+        };
+        if (category) {
+            if (typeof category === "object") {
+                filterQueries.categories = category;
+            }
+            else {
+                filterQueries.categories = [category];
+            }
+        }
+        if (brands) {
+            if (typeof brands === "object") {
+                filterQueries.brands = brands;
+            }
+            else {
+                filterQueries.brands = [brands];
+            }
+        }
+        if (colors) {
+            if (typeof colors === "object") {
+                filterQueries.colors = colors;
+            }
+            else {
+                filterQueries.colors = [colors];
+            }
+        }
+        if (size) {
+            if (typeof size === "object") {
+                filterQueries.size = size;
+            }
+            else {
+                filterQueries.size = [size];
+            }
+        }
+        let filterObject = {};
+        if (filterQueries.brands.length > 0) {
+            filterObject.brand = { $in: filterQueries.brands };
+        }
+        if (filterQueries.categories.length > 0) {
+            filterObject.category = { $in: filterQueries.categories };
+        }
+        if (filterQueries.size.length > 0) {
+            filterObject.size = { $in: filterQueries.size };
+        }
+        if (filterQueries.colors.length > 0) {
+            filterObject["color.colorName"] = { $in: filterQueries.colors };
+        }
+        let priceFilter = {};
+        // price: {
+        //     $gte: Number(min),
+        //     $lte: Number(max),
+        //   },
+        if (min) {
+            priceFilter["$gte"] = Number(min);
+        }
+        if (max) {
+            priceFilter["$lte"] = Number(max);
+        }
         const products = await Product.find({
             $or: [
                 { title: { $regex: searchQuery, $options: "i" } },
@@ -40,10 +108,57 @@ export const searchProduct = async (req, res) => {
                 { description: { $regex: searchQuery, $options: "i" } },
                 { category: { $regex: searchQuery, $options: "i" } },
             ],
+            price: { ...priceFilter },
+            ...filterObject,
+        });
+        if (products.length === 0) {
+            return res.status(200).json({
+                success: true,
+                products: [],
+            });
+        }
+        let minPrice = products[0].price;
+        let maxPrice = products[0].price;
+        let filters = {
+            brands: [],
+            categories: [],
+            colors: [],
+            size: [],
+        };
+        products?.forEach((product) => {
+            if (product.brand) {
+                if (!filters.brands.includes(product?.brand)) {
+                    filters.brands.push(product.brand);
+                }
+            }
+            if (product.category) {
+                if (!filters.categories.includes(product?.category)) {
+                    filters.categories.push(product.category);
+                }
+            }
+            if (product.color) {
+                if (!filters.colors.includes(product?.color.colorName)) {
+                    filters.colors.push(product.color.colorName);
+                }
+            }
+            if (product.size) {
+                if (!filters.size.includes(product?.size)) {
+                    filters.size.push(product.size);
+                }
+            }
+            if (minPrice > product.price) {
+                minPrice = product.price;
+            }
+            if (maxPrice < product.price) {
+                maxPrice = product.price;
+            }
         });
         return res.status(200).json({
             success: true,
             products,
+            filters,
+            minPrice,
+            maxPrice,
         });
     }
     catch (error) {

@@ -15,6 +15,10 @@ const CartSchema = new Schema({
                 type: Number,
                 default: 1,
             },
+            updatedAt: {
+                type: Date,
+                default: Date.now,
+            },
         },
     ],
     totalQuantity: {

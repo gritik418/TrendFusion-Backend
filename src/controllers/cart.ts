@@ -91,7 +91,9 @@ export const addToCart = async (req: Request, res: Response) => {
     if (!checkCart) {
       const newCart = new Cart({
         userId,
-        items: [{ product: productId, quantity: quantity }],
+        items: [
+          { product: productId, quantity: quantity, updatedAt: Date.now() },
+        ],
         totalQuantity: quantity,
       });
 
@@ -117,7 +119,7 @@ export const addToCart = async (req: Request, res: Response) => {
 
     if (product?.stock! < addedQuantity + quantity) {
       return res.status(200).json({
-        success: true,
+        success: false,
         message: "Stock not available.",
       });
     }
@@ -132,6 +134,7 @@ export const addToCart = async (req: Request, res: Response) => {
         {
           product: duplicateProduct,
           quantity: (addedQuantity += quantity),
+          updatedAt: Date.now(),
         },
       ];
 
@@ -148,7 +151,9 @@ export const addToCart = async (req: Request, res: Response) => {
       await Cart.findOneAndUpdate(
         { userId },
         {
-          $push: { items: { product: product._id, quantity } },
+          $push: {
+            items: { product: product._id, quantity, updatedAt: Date.now() },
+          },
           $set: {
             totalQuantity: checkCart.totalQuantity + quantity,
           },
@@ -206,8 +211,8 @@ export const incrementProductQuantity = async (req: Request, res: Response) => {
     }
 
     if (product?.stock! < addedQuantity + 1) {
-      return res.status(200).json({
-        success: true,
+      return res.status(400).json({
+        success: false,
         message: "Stock not available.",
       });
     }
@@ -221,6 +226,7 @@ export const incrementProductQuantity = async (req: Request, res: Response) => {
       {
         product: duplicateProduct,
         quantity: addedQuantity + 1,
+        updatedAt: Date.now(),
       },
     ];
     await Cart.findOneAndUpdate(
@@ -298,6 +304,7 @@ export const decrementProductQuantity = async (req: Request, res: Response) => {
       {
         product: duplicateProduct,
         quantity: addedQuantity - 1,
+        updatedAt: Date.now(),
       },
     ];
     await Cart.findOneAndUpdate(

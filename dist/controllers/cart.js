@@ -79,7 +79,9 @@ export const addToCart = async (req, res) => {
         if (!checkCart) {
             const newCart = new Cart({
                 userId,
-                items: [{ product: productId, quantity: quantity }],
+                items: [
+                    { product: productId, quantity: quantity, updatedAt: Date.now() },
+                ],
                 totalQuantity: quantity,
             });
             await newCart.save();
@@ -100,7 +102,7 @@ export const addToCart = async (req, res) => {
         });
         if (product?.stock < addedQuantity + quantity) {
             return res.status(200).json({
-                success: true,
+                success: false,
                 message: "Stock not available.",
             });
         }
@@ -111,6 +113,7 @@ export const addToCart = async (req, res) => {
                 {
                     product: duplicateProduct,
                     quantity: (addedQuantity += quantity),
+                    updatedAt: Date.now(),
                 },
             ];
             await Cart.findOneAndUpdate({ userId }, {
@@ -122,7 +125,9 @@ export const addToCart = async (req, res) => {
         }
         else {
             await Cart.findOneAndUpdate({ userId }, {
-                $push: { items: { product: product._id, quantity } },
+                $push: {
+                    items: { product: product._id, quantity, updatedAt: Date.now() },
+                },
                 $set: {
                     totalQuantity: checkCart.totalQuantity + quantity,
                 },
@@ -171,8 +176,8 @@ export const incrementProductQuantity = async (req, res) => {
             });
         }
         if (product?.stock < addedQuantity + 1) {
-            return res.status(200).json({
-                success: true,
+            return res.status(400).json({
+                success: false,
                 message: "Stock not available.",
             });
         }
@@ -182,6 +187,7 @@ export const incrementProductQuantity = async (req, res) => {
             {
                 product: duplicateProduct,
                 quantity: addedQuantity + 1,
+                updatedAt: Date.now(),
             },
         ];
         await Cart.findOneAndUpdate({ userId }, {
@@ -244,6 +250,7 @@ export const decrementProductQuantity = async (req, res) => {
             {
                 product: duplicateProduct,
                 quantity: addedQuantity - 1,
+                updatedAt: Date.now(),
             },
         ];
         await Cart.findOneAndUpdate({ userId }, {
