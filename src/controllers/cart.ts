@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
-import { ProductType } from "../types/index.js";
+import { CartType, ProductType } from "../types/index.js";
 
 export const getCart = async (req: Request, res: Response) => {
   try {
@@ -63,6 +63,39 @@ export const getCart = async (req: Request, res: Response) => {
         deliveryCharges,
         platformFee,
       },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error.",
+    });
+  }
+};
+
+export const getCartCount = async (req: Request, res: Response) => {
+  try {
+    const userId: string = req.params.userId;
+    if (!userId)
+      return res.status(401).json({
+        success: false,
+        message: "User not found.",
+      });
+
+    const cart: CartType | null = await Cart.findOne({ userId }).select({
+      totalQuantity: 1,
+      _id: 0,
+    });
+
+    if (!cart)
+      return res.status(200).json({
+        success: true,
+        message: "Cart is Empty.",
+        cartCount: 0,
+      });
+
+    return res.status(200).json({
+      success: true,
+      cartCount: cart.totalQuantity,
     });
   } catch (error) {
     return res.status(500).json({

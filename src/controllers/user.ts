@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import User from "../models/User.js";
-import Cart from "../models/Cart.js";
 import { UserType } from "../types/index.js";
 
 export const getUser = async (req: Request, res: Response) => {
@@ -10,11 +9,6 @@ export const getUser = async (req: Request, res: Response) => {
       verificationCodeExpiry: 0,
       verificationCode: 0,
       provider: 0,
-    });
-
-    const cart = await Cart.findOne({ userId }).select({
-      totalQuantity: 1,
-      _id: 0,
     });
 
     if (!user || !userId) {
@@ -27,7 +21,6 @@ export const getUser = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       data: user,
-      cartCount: cart?.totalQuantity || 0,
     });
   } catch (error) {
     return res.status(500).json({

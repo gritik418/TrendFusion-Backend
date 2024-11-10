@@ -170,3 +170,21 @@ interface JWTPayload extends JwtPayload {
   email: string;
   role: "customer" | "admin" | "seller";
 }
+
+type VariantSize = {
+  size: string;
+  slug: string;
+};
+
+type Variant = {
+  colorImage: string;
+  colorName: string;
+  size?: VariantSize[];
+};
+
+type Filters = {
+  brands: string[];
+  categories: string[];
+  colors: string[];
+  size: string[];
+};

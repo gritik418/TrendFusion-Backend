@@ -1,24 +1,6 @@
 import { Request, Response } from "express";
 import Product from "../models/Product.js";
-import { ProductType } from "../types/index.js";
-
-type VariantSize = {
-  size: string;
-  slug: string;
-};
-
-type Variant = {
-  colorImage: string;
-  colorName: string;
-  size?: VariantSize[];
-};
-
-type Filters = {
-  brands: string[];
-  categories: string[];
-  colors: string[];
-  size: string[];
-};
+import { Filters, ProductType, Variant } from "../types/index.js";
 
 export const getProductSuggestions = async (req: Request, res: Response) => {
   try {
@@ -118,12 +100,9 @@ export const searchProduct = async (req: Request, res: Response) => {
     }
 
     let priceFilter: { $gte?: number; $lte?: number } = {};
-    // price: {
-    //     $gte: Number(min),
-    //     $lte: Number(max),
-    //   },
+    priceFilter["$gte"] = 0;
     if (min) {
-      priceFilter["$gte"] = Number(min);
+      priceFilter["$gte"] = Number(min) || 0;
     }
     if (max) {
       priceFilter["$lte"] = Number(max);

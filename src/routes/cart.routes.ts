@@ -4,6 +4,7 @@ import {
   addToCart,
   decrementProductQuantity,
   getCart,
+  getCartCount,
   incrementProductQuantity,
   removeFromCart,
 } from "../controllers/cart.js";
@@ -11,6 +12,8 @@ import {
 const router = Router();
 
 router.get("/", authenticate, getCart);
+
+router.get("/count", authenticate, getCartCount);
 
 router.post("/add", authenticate, addToCart);
 

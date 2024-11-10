@@ -91,12 +91,9 @@ export const searchProduct = async (req, res) => {
             filterObject["color.colorName"] = { $in: filterQueries.colors };
         }
         let priceFilter = {};
-        // price: {
-        //     $gte: Number(min),
-        //     $lte: Number(max),
-        //   },
+        priceFilter["$gte"] = 0;
         if (min) {
-            priceFilter["$gte"] = Number(min);
+            priceFilter["$gte"] = Number(min) || 0;
         }
         if (max) {
             priceFilter["$lte"] = Number(max);
