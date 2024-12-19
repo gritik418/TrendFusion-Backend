@@ -21,6 +21,6 @@ const addressSchema = z.object({
     appartment: z.string().optional(),
     landmark: z.string().optional(),
     addressType: z.enum(["home", "work"]),
-    isDefault: z.boolean().optional(),
+    isDefault: z.boolean(),
 });
 export default addressSchema;

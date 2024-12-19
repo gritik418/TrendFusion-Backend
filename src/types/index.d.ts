@@ -55,9 +55,10 @@ type Color = {
   colorImage: string;
 };
 
-interface OrderType extends Document {
+interface OrderType {
   orderId: string;
   userId: Types.ObjectId;
+  paymentId?: Types.ObjectId;
   orderDate: Date;
   expectedDeliveryDate?: Date;
   deliveredOn?: Date;
@@ -75,6 +76,38 @@ interface OrderType extends Document {
     | "Cash on Delivery";
   deliveryAddress: DeliveryAddress;
   trackingId?: string;
+}
+
+interface PaymentType extends Document {
+  paymentId: string;
+  orderId: Types.ObjectId;
+  userId?: Types.ObjectId;
+  paymentMethod: string;
+  paymentStatus: "pending" | "successful" | "failed" | "refunded";
+  transactionId?: string;
+  amount: number;
+  currency: string;
+  paymentDate: Date;
+  cardType?: string;
+  last4?: string;
+  expiryDate?: string;
+  billingAddress?: {
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  refundStatus?: "not_refunded" | "partially_refunded" | "fully_refunded";
+  refundAmount?: number;
+  paymentGateway?: string;
+  gatewayResponse?: {
+    responseCode: string;
+    message: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface CartType extends Document {
@@ -110,15 +143,15 @@ interface WishlistItem {
 }
 
 interface OrderProductInfo {
-  productId: Types.ObjectId;
+  productId: string;
   title: string;
-  brand: string;
+  brand?: string;
   thumbnail: string;
   quantity: number;
   unitPrice: number;
   unitDiscount?: Discount;
   color?: string;
-  size?: string;
+  size?: Color;
 }
 
 interface CartItem {

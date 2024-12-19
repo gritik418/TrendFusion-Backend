@@ -8,9 +8,7 @@ import {
 
 const ProductItemSchema = new Schema<OrderProductInfo>({
   productId: {
-    type: Schema.Types.ObjectId,
-    ref: "Product",
-    required: true,
+    type: String,
   },
   brand: {
     type: String,
@@ -85,6 +83,10 @@ const OrderSchema = new Schema<OrderType>(
       required: true,
       unique: true,
     },
+    paymentId: {
+      type: Schema.Types.ObjectId,
+      ref: "Payment",
+    },
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -96,7 +98,9 @@ const OrderSchema = new Schema<OrderType>(
       required: true,
       min: 1,
     },
-    discount: DiscountSchema,
+    discount: {
+      type: Number,
+    },
     finalPrice: {
       type: Number,
       required: true,

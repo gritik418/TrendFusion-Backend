@@ -2,9 +2,7 @@ import mongoose, { model, Schema } from "mongoose";
 import { DiscountSchema } from "./Product.js";
 const ProductItemSchema = new Schema({
     productId: {
-        type: Schema.Types.ObjectId,
-        ref: "Product",
-        required: true,
+        type: String,
     },
     brand: {
         type: String,
@@ -76,6 +74,10 @@ const OrderSchema = new Schema({
         required: true,
         unique: true,
     },
+    paymentId: {
+        type: Schema.Types.ObjectId,
+        ref: "Payment",
+    },
     userId: {
         type: Schema.Types.ObjectId,
         ref: "User",
@@ -87,7 +89,9 @@ const OrderSchema = new Schema({
         required: true,
         min: 1,
     },
-    discount: DiscountSchema,
+    discount: {
+        type: Number,
+    },
     finalPrice: {
         type: Number,
         required: true,
