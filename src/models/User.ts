@@ -11,7 +11,9 @@ const AddressSchema = new Schema<DeliveryAddress>({
   isDefault: { type: Boolean, default: false },
   appartment: { type: String },
   landmark: { type: String },
-  phoneNumber: [{ type: String }],
+  phoneNumber: { type: String },
+  addressType: { type: String },
+  alternatePhoneNumber: { type: String },
 });
 
 const UserSchema = new Schema<UserType>(

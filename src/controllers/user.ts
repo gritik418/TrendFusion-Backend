@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/User.js";
-import { UserType } from "../types/index.js";
+import { DeliveryAddress, UserType } from "../types/index.js";
+import addressSchema from "../validators/addressSchema.js";
 
 export const getUser = async (req: Request, res: Response) => {
   try {
@@ -61,6 +62,53 @@ export const updatePhoneNumber = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       message: "Phone Number Updated!",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error.",
+    });
+  }
+};
+
+export const addShippingAddress = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.userId;
+    const address: DeliveryAddress | null = req.body;
+
+    const result = addressSchema.safeParse(address);
+
+    if (!result.success) {
+      if (result.error) {
+        const errors: any = {};
+        result.error.errors.forEach((error) => {
+          errors[error.path[0]] = error.message;
+        });
+
+        return res.status(400).json({
+          success: false,
+          message: "Validation Error.",
+          errors,
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: "Something went wrong.",
+      });
+    }
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    await User.findByIdAndUpdate(userId, { $push: { addresses: address } });
+
+    return res.status(200).json({
+      success: true,
+      message: "Address Added!",
     });
   } catch (error) {
     return res.status(500).json({
