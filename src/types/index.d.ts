@@ -143,7 +143,7 @@ interface WishlistItem {
 }
 
 interface OrderProductInfo {
-  productId: string;
+  _id: string;
   title: string;
   brand?: string;
   thumbnail: string;

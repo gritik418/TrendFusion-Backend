@@ -6,13 +6,13 @@ const discountSchema = z.object({
     description: z.string(),
 });
 const itemsSchema = z.object({
+    _id: z.string(),
     brand: z.string().optional(),
     title: z.string(),
     unitPrice: z.number().min(1),
     quantity: z.number().min(1),
     thumbnail: z.string(),
-    productId: z.string(),
-    color: z.any().optional(),
+    color: z.string().optional(),
     size: z.string().optional(),
     unitDiscount: discountSchema.optional(),
 });

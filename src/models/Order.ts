@@ -7,7 +7,7 @@ import {
 } from "../types/index.js";
 
 const ProductItemSchema = new Schema<OrderProductInfo>({
-  productId: {
+  _id: {
     type: String,
   },
   brand: {

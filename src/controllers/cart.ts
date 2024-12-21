@@ -25,6 +25,10 @@ export const getCart = async (req: Request, res: Response) => {
       size: 1,
     });
 
+    cart.items.sort((a: any, b: any) => {
+      return b.updatedAt - a.updatedAt;
+    });
+
     if (!cart)
       return res.status(200).json({
         success: true,
@@ -81,10 +85,7 @@ export const getCartCount = async (req: Request, res: Response) => {
         message: "User not found.",
       });
 
-    const cart: CartType | null = await Cart.findOne({ userId }).select({
-      totalQuantity: 1,
-      _id: 0,
-    });
+    const cart: CartType | null = await Cart.findOne({ userId });
 
     if (!cart)
       return res.status(200).json({
@@ -119,8 +120,16 @@ export const addToCart = async (req: Request, res: Response) => {
         message: "Product not found.",
       });
 
+    if (product.stock < quantity) {
+      return res.status(400).json({
+        success: false,
+        message: "Out of Stock.",
+      });
+    }
+
     const checkCart = await Cart.findOne({ userId });
 
+    console.log("quantity ", quantity, checkCart);
     if (!checkCart) {
       const newCart = new Cart({
         userId,
@@ -153,7 +162,7 @@ export const addToCart = async (req: Request, res: Response) => {
     if (product?.stock! < addedQuantity + quantity) {
       return res.status(200).json({
         success: false,
-        message: "Stock not available.",
+        message: "Out of Stock.",
       });
     }
 
@@ -166,7 +175,7 @@ export const addToCart = async (req: Request, res: Response) => {
         ...filteredItems,
         {
           product: duplicateProduct,
-          quantity: (addedQuantity += quantity),
+          quantity: addedQuantity + quantity,
           updatedAt: Date.now(),
         },
       ];

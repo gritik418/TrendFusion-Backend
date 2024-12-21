@@ -20,6 +20,9 @@ export const getCart = async (req, res) => {
             color: 1,
             size: 1,
         });
+        cart.items.sort((a, b) => {
+            return b.updatedAt - a.updatedAt;
+        });
         if (!cart)
             return res.status(200).json({
                 success: true,
@@ -72,10 +75,7 @@ export const getCartCount = async (req, res) => {
                 success: false,
                 message: "User not found.",
             });
-        const cart = await Cart.findOne({ userId }).select({
-            totalQuantity: 1,
-            _id: 0,
-        });
+        const cart = await Cart.findOne({ userId });
         if (!cart)
             return res.status(200).json({
                 success: true,
@@ -105,7 +105,14 @@ export const addToCart = async (req, res) => {
                 success: false,
                 message: "Product not found.",
             });
+        if (product.stock < quantity) {
+            return res.status(400).json({
+                success: false,
+                message: "Out of Stock.",
+            });
+        }
         const checkCart = await Cart.findOne({ userId });
+        console.log("quantity ", quantity, checkCart);
         if (!checkCart) {
             const newCart = new Cart({
                 userId,
@@ -133,7 +140,7 @@ export const addToCart = async (req, res) => {
         if (product?.stock < addedQuantity + quantity) {
             return res.status(200).json({
                 success: false,
-                message: "Stock not available.",
+                message: "Out of Stock.",
             });
         }
         if (alreadyAdded && duplicateProduct) {
@@ -142,7 +149,7 @@ export const addToCart = async (req, res) => {
                 ...filteredItems,
                 {
                     product: duplicateProduct,
-                    quantity: (addedQuantity += quantity),
+                    quantity: addedQuantity + quantity,
                     updatedAt: Date.now(),
                 },
             ];

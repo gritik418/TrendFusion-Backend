@@ -1,7 +1,7 @@
 import mongoose, { model, Schema } from "mongoose";
 import { DiscountSchema } from "./Product.js";
 const ProductItemSchema = new Schema({
-    productId: {
+    _id: {
         type: String,
     },
     brand: {
