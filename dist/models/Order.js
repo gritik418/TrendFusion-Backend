@@ -131,6 +131,14 @@ const OrderSchema = new Schema({
         type: String,
         unique: true,
     },
+    deliveryCharges: {
+        type: Number,
+        default: 0,
+    },
+    platformFee: {
+        type: Number,
+        default: 0,
+    },
 }, { timestamps: true });
 const Order = mongoose.models.Order ||
     model("Order", OrderSchema);

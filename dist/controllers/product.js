@@ -165,7 +165,7 @@ export const searchProduct = async (req, res) => {
         });
     }
 };
-export const getProductById = async (req, res) => {
+export const getProductByProductId = async (req, res) => {
     try {
         const productId = req.params.id;
         if (!productId)
@@ -220,6 +220,32 @@ export const getProductById = async (req, res) => {
             success: true,
             product,
             variants: Object.values(variants),
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Server Error.",
+        });
+    }
+};
+export const getProductById = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        if (!productId)
+            return res.status(200).json({
+                success: false,
+                message: "Product Id not found.",
+            });
+        const product = await Product.findById(productId);
+        if (!product)
+            return res.status(400).json({
+                success: false,
+                message: "Product not found.",
+            });
+        return res.status(200).json({
+            success: true,
+            product,
         });
     }
     catch (error) {

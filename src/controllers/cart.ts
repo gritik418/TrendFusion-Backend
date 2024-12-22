@@ -129,7 +129,6 @@ export const addToCart = async (req: Request, res: Response) => {
 
     const checkCart = await Cart.findOne({ userId });
 
-    console.log("quantity ", quantity, checkCart);
     if (!checkCart) {
       const newCart = new Cart({
         userId,
@@ -424,6 +423,39 @@ export const removeFromCart = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       message: "Item removed.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error.",
+    });
+  }
+};
+
+export const clearCart = async (req: Request, res: Response) => {
+  try {
+    const userId: string = req.params.userId;
+
+    const cart = await Cart.findOne({ userId });
+
+    if (!cart)
+      return res.status(400).json({
+        success: false,
+        message: "Cart not found.",
+      });
+
+    await Cart.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          items: [],
+          totalQuantity: 0,
+        },
+      }
+    );
+    return res.status(200).json({
+      success: true,
+      message: "Cart cleared.",
     });
   } catch (error) {
     return res.status(500).json({

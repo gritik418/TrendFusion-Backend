@@ -140,6 +140,14 @@ const OrderSchema = new Schema<OrderType>(
       type: String,
       unique: true,
     },
+    deliveryCharges: {
+      type: Number,
+      default: 0,
+    },
+    platformFee: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

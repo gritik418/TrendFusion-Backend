@@ -2,6 +2,7 @@ import { Router } from "express";
 import authenticate from "../middlewares/authenticate.js";
 import {
   addToCart,
+  clearCart,
   decrementProductQuantity,
   getCart,
   getCartCount,
@@ -22,5 +23,7 @@ router.patch("/inc/:productId", authenticate, incrementProductQuantity);
 router.patch("/dec/:productId", authenticate, decrementProductQuantity);
 
 router.patch("/remove/:productId", authenticate, removeFromCart);
+
+router.patch("/clear", authenticate, clearCart);
 
 export default router;
