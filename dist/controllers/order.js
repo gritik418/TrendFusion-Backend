@@ -98,3 +98,32 @@ export const getOrders = async (req, res) => {
         });
     }
 };
+export const getOrderById = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const orderId = req.params.orderId;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
+        const order = await Order.findOne({ orderId });
+        if (!order) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid order id.",
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            order,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Server Error.",
+        });
+    }
+};
