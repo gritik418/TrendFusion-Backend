@@ -45,6 +45,8 @@ export const searchProduct = async (req: Request, res: Response) => {
     const size = req.query["size"];
     const min = req.query["min"];
     const max = req.query["max"];
+    const sortCriteria = req.query["sortCriteria"];
+    const sortOrder = req.query["sortOrder"];
 
     let filterQueries: Filters = {
       brands: [],
@@ -108,6 +110,52 @@ export const searchProduct = async (req: Request, res: Response) => {
       priceFilter["$lte"] = Number(max);
     }
 
+    const priceObject = await Product.find({
+      $or: [
+        { title: { $regex: searchQuery, $options: "i" } },
+        { brand: { $regex: searchQuery, $options: "i" } },
+        { description: { $regex: searchQuery, $options: "i" } },
+        { category: { $regex: searchQuery, $options: "i" } },
+      ],
+    }).select({ price: 1, _id: 0 });
+
+    if (priceObject.length === 0) {
+      return res.status(200).json({
+        success: true,
+        products: [],
+      });
+    }
+
+    let minPrice: number = 0;
+    let maxPrice: number = 0;
+    let sortObject: { [criteria: string]: number } | undefined = { price: 1 };
+
+    if (sortCriteria) {
+      if (sortCriteria === "price") {
+        sortObject = { price: 1 };
+        if (sortOrder && sortOrder === "desc") {
+          sortObject = { price: -1 };
+        }
+      } else {
+        sortObject = { rating: 1 };
+        if (sortOrder && sortOrder === "desc") {
+          sortObject = { rating: -1 };
+        }
+      }
+    }
+
+    priceObject.forEach(({ price }, index: number) => {
+      if (index === 0) {
+        minPrice = price;
+      }
+      if (price < minPrice) {
+        minPrice = price;
+      }
+      if (price > maxPrice) {
+        maxPrice = price;
+      }
+    });
+
     const products = await Product.find({
       $or: [
         { title: { $regex: searchQuery, $options: "i" } },
@@ -117,7 +165,7 @@ export const searchProduct = async (req: Request, res: Response) => {
       ],
       price: { ...priceFilter },
       ...filterObject,
-    });
+    }).sort({ ...sortObject } as any);
 
     if (products.length === 0) {
       return res.status(200).json({
@@ -126,8 +174,6 @@ export const searchProduct = async (req: Request, res: Response) => {
       });
     }
 
-    let minPrice: number = products[0].price;
-    let maxPrice: number = products[0].price;
     let filters: Filters = {
       brands: [],
       categories: [],
@@ -155,12 +201,6 @@ export const searchProduct = async (req: Request, res: Response) => {
         if (!filters.size.includes(product?.size)) {
           filters.size.push(product.size);
         }
-      }
-      if (minPrice > product.price) {
-        minPrice = product.price;
-      }
-      if (maxPrice < product.price) {
-        maxPrice = product.price;
       }
     });
 

@@ -39,6 +39,8 @@ export const searchProduct = async (req, res) => {
         const size = req.query["size"];
         const min = req.query["min"];
         const max = req.query["max"];
+        const sortCriteria = req.query["sortCriteria"];
+        const sortOrder = req.query["sortOrder"];
         let filterQueries = {
             brands: [],
             categories: [],
@@ -98,6 +100,48 @@ export const searchProduct = async (req, res) => {
         if (max) {
             priceFilter["$lte"] = Number(max);
         }
+        const priceObject = await Product.find({
+            $or: [
+                { title: { $regex: searchQuery, $options: "i" } },
+                { brand: { $regex: searchQuery, $options: "i" } },
+                { description: { $regex: searchQuery, $options: "i" } },
+                { category: { $regex: searchQuery, $options: "i" } },
+            ],
+        }).select({ price: 1, _id: 0 });
+        if (priceObject.length === 0) {
+            return res.status(200).json({
+                success: true,
+                products: [],
+            });
+        }
+        let minPrice = 0;
+        let maxPrice = 0;
+        let sortObject = { price: 1 };
+        if (sortCriteria) {
+            if (sortCriteria === "price") {
+                sortObject = { price: 1 };
+                if (sortOrder && sortOrder === "desc") {
+                    sortObject = { price: -1 };
+                }
+            }
+            else {
+                sortObject = { rating: 1 };
+                if (sortOrder && sortOrder === "desc") {
+                    sortObject = { rating: -1 };
+                }
+            }
+        }
+        priceObject.forEach(({ price }, index) => {
+            if (index === 0) {
+                minPrice = price;
+            }
+            if (price < minPrice) {
+                minPrice = price;
+            }
+            if (price > maxPrice) {
+                maxPrice = price;
+            }
+        });
         const products = await Product.find({
             $or: [
                 { title: { $regex: searchQuery, $options: "i" } },
@@ -107,15 +151,13 @@ export const searchProduct = async (req, res) => {
             ],
             price: { ...priceFilter },
             ...filterObject,
-        });
+        }).sort({ ...sortObject });
         if (products.length === 0) {
             return res.status(200).json({
                 success: true,
                 products: [],
             });
         }
-        let minPrice = products[0].price;
-        let maxPrice = products[0].price;
         let filters = {
             brands: [],
             categories: [],
@@ -142,12 +184,6 @@ export const searchProduct = async (req, res) => {
                 if (!filters.size.includes(product?.size)) {
                     filters.size.push(product.size);
                 }
-            }
-            if (minPrice > product.price) {
-                minPrice = product.price;
-            }
-            if (maxPrice < product.price) {
-                maxPrice = product.price;
             }
         });
         return res.status(200).json({
