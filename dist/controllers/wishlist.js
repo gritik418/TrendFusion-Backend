@@ -21,6 +21,7 @@ export const getWishlist = async (req, res) => {
             thumbnail: 1,
             stock: 1,
             isAvailable: 1,
+            rating: 1,
         });
         return res.status(200).json({
             success: true,
@@ -72,7 +73,7 @@ export const addToWishlist = async (req, res) => {
 export const removeFromWishlist = async (req, res) => {
     try {
         const userId = req.params.userId;
-        const productId = req.body.productId;
+        const productId = req.params.productId;
         if (!userId)
             return res.status(401).json({
                 success: false,

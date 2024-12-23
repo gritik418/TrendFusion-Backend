@@ -12,6 +12,6 @@ router.get("/", authenticate, getWishlist);
 
 router.post("/add", authenticate, addToWishlist);
 
-router.patch("/remove", authenticate, removeFromWishlist);
+router.patch("/remove/:productId", authenticate, removeFromWishlist);
 
 export default router;

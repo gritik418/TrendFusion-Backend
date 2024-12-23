@@ -138,6 +138,7 @@ interface ReviewsType extends Document {
 }
 
 interface WishlistItem {
+  _id: string;
   productId: string;
   title: string;
   brand?: string;
@@ -145,8 +146,10 @@ interface WishlistItem {
   isAvailable: boolean;
   price: number;
   discount?: Discount;
-  rating?: number;
   stock: number;
+  color?: Color;
+  size?: string;
+  rating?: number;
 }
 
 interface OrderProductInfo {
