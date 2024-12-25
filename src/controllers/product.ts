@@ -47,6 +47,9 @@ export const searchProduct = async (req: Request, res: Response) => {
     const max = req.query["max"];
     const sortCriteria = req.query["sortCriteria"];
     const sortOrder = req.query["sortOrder"];
+    const page = req.query["page"];
+    const limit = req.query["limit"];
+    let skip = (Number(page) - 1) * Number(limit);
 
     let filterQueries: Filters = {
       brands: [],
@@ -125,6 +128,7 @@ export const searchProduct = async (req: Request, res: Response) => {
         products: [],
       });
     }
+    let maxPages = Math.ceil(priceObject.length / Number(limit));
 
     let minPrice: number = 0;
     let maxPrice: number = 0;
@@ -165,7 +169,10 @@ export const searchProduct = async (req: Request, res: Response) => {
       ],
       price: { ...priceFilter },
       ...filterObject,
-    }).sort({ ...sortObject } as any);
+    })
+      .sort({ ...sortObject } as any)
+      .skip(skip)
+      .limit(Number(limit));
 
     if (products.length === 0) {
       return res.status(200).json({
@@ -210,6 +217,7 @@ export const searchProduct = async (req: Request, res: Response) => {
       filters,
       minPrice,
       maxPrice,
+      maxPages,
     });
   } catch (error) {
     return res.status(500).json({
