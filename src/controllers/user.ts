@@ -117,3 +117,29 @@ export const addShippingAddress = async (req: Request, res: Response) => {
     });
   }
 };
+
+// TODO: Api not completed
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.userId;
+    const data = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      // data: user,
+      message: "Updated Successfully!",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error.",
+    });
+  }
+};

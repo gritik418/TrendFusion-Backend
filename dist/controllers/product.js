@@ -43,9 +43,7 @@ export const searchProduct = async (req, res) => {
         const sortOrder = req.query["sortOrder"];
         const page = req.query["page"];
         const limit = req.query["limit"];
-        console.log("page ->", page, "\nlimit ->", limit);
         let skip = (Number(page) - 1) * Number(limit);
-        console.log("skip ->", skip);
         let filterQueries = {
             brands: [],
             categories: [],
