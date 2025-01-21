@@ -74,11 +74,7 @@ interface OrderType {
   totalPrice: number;
   discount?: number;
   finalPrice: number;
-  paymentMethod:
-    | "Credit Card"
-    | "PayPal"
-    | "Bank Transfer"
-    | "Cash on Delivery";
+  paymentMethod: "Prepaid" | "Cash on Delivery";
   deliveryAddress: DeliveryAddress;
   trackingId?: string;
   deliveryCharges?: number;

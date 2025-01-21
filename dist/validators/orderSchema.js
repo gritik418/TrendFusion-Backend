@@ -24,12 +24,7 @@ const orderSchema = z.object({
     totalPrice: z.number().min(1),
     discount: z.number().optional(),
     finalPrice: z.number().min(1),
-    paymentMethod: z.enum([
-        "Credit Card",
-        "PayPal",
-        "Bank Transfer",
-        "Cash on Delivery",
-    ]),
+    paymentMethod: z.enum(["Prepaid", "Cash on Delivery"]),
     deliveryAddress: addressSchema,
     trackingId: z.string().optional(),
 });

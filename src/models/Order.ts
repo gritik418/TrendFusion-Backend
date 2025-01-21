@@ -117,7 +117,7 @@ const OrderSchema = new Schema<OrderType>(
     },
     paymentMethod: {
       type: String,
-      enum: ["Credit Card", "PayPal", "Bank Transfer", "Cash on Delivery"],
+      enum: ["Prepaid", "Cash on Delivery"],
       default: "Cash on Delivery",
     },
     orderDate: {

@@ -75,6 +75,9 @@ export const createOrder = async (req: Request, res: Response) => {
       trackingId: orderId,
     });
 
+    // if (result.data.paymentMethod === "Prepaid") {
+    //       }
+
     await order.save();
 
     return res.status(200).json({
